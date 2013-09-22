@@ -89,7 +89,7 @@ void testApp::update() {
         // work with blue channel pixels to make them all 255
         unsigned char * pixBLUE = imageB.getPixels();
         for(int i = 0; i < numPixels; i++) {
-            pixBLUE[i] = a;
+            pixBLUE[i] = 255;
         }
         ofxCvGrayscaleImage imageG = imageR;
         // work with green channel pixels to make them all \
