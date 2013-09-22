@@ -3,7 +3,15 @@
 
 //--------------------------------------------------------------
 void testApp::setup() {
-	ofSetLogLevel(OF_LOG_VERBOSE);
+    ofResetElapsedTimeCounter();
+    cals = ofToString(ofRandom(1.284,  2.471));// (min, max)
+    bpm = cals.substr(0, 5);
+    bpm = ofToString(ofRandom(125, 185));
+    
+	font.loadFont("franklinGothic.otf", 72);
+    fontSMALL.loadFont("franklinGothic.otf", 18);
+	
+    ofSetLogLevel(OF_LOG_VERBOSE);
 	
 	// enable depth->video image calibration
 	kinect.setRegistration(true);
@@ -104,6 +112,7 @@ void testApp::update() {
         }
 		//colorImgMultiply.setFromGrayscalePlanarImages(imageG, imageG, imageG);
 		colorImgMultiply.setFromGrayscalePlanarImages(imageR, imageG, imageB);
+        colorImgMultiply.mirror(false, true);
         
 		// we do two thresholds - one for the far plane and one for the near plane
 		// we then do a cvAnd to get the pixels which are a union of the two thresholds
@@ -143,10 +152,9 @@ void testApp::update() {
 
 //--------------------------------------------------------------
 void testApp::draw() {
-    
+
     // clear reportStream
     stringstream reportStream;
-	//reportStream.str() = ""; //TODO: this still doesn't work
     reportStream << "screenID = " << screenID << endl;
 
     
@@ -255,11 +263,10 @@ void testApp::draw() {
                 // show people how they can work with the pixels
                 unsigned char * pix = colorImgMultiply.getPixels();
                 
-                colorImgMultiply.mirror(false, true);
                                 
                 // draw from the live kinect
                 //colorImgMultiply.draw(0, 0, 1280, 800);
-                kinect.drawDepth(0, 0, 1280, 800); //drawDepth draws an ofTexture
+                // kinect.drawDepth(0, 0, 1280, 800); //drawDepth draws an ofTexture
                 colorImgMultiply.draw(-30, -30, 1340, 860);
                 // kinect.drawDepth(10, 10, 400, 300);
                 // kinect.draw(420, 10, 400, 300);
@@ -340,6 +347,35 @@ void testApp::draw() {
     }
     
     ofDrawBitmapString(reportStream.str(), 20, 652);
+    
+    
+    // display calories burned and bpm
+    if (ofGetElapsedTimeMillis() > 1000 ) {
+        cals = ofToString(ofRandom(1.284,  2.471));// (min, max)
+        cals = cals.substr(0, 5);
+        bpm = ofToString(ofRandom(125, 185));
+        bpm = bpm.substr(0, 3);
+        labelCAL = "CALORIES PER MINUTE";
+        labelBPM = "HEARTBEATS PER MINUTE";
+        
+        ofResetElapsedTimeCounter();
+    }
+    ofEnableAlphaBlending();
+    
+    ofSetColor(255, 128, 0, 255);
+    ofRect(980, 15, 1200, 145);
+    
+    ofSetColor(128, 255, 0, 255);
+    ofRect(980, 165, 1200, 145);
+
+    ofDisableAlphaBlending();
+
+    ofSetColor(255, 255, 255);
+    fontSMALL.drawString(labelCAL, 1000, 50);
+    font.drawString(cals, 1000, 132);
+    fontSMALL.drawString(labelBPM, 1000, 200);
+    font.drawString(bpm, 1000, 282);
+    
 }
 
 void testApp::drawPointCloud() {

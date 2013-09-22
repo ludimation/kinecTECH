@@ -74,6 +74,15 @@ private:
     // 3 > workout stats, credits
     int screenID;
     
+	ofTrueTypeFont		font;
+    ofTrueTypeFont      fontSMALL;
+    
+    string cals;
+    string labelCAL;
+    string bpm;
+    string labelBPM;
+    string messageSMALL;
+   
     // reportstream for text to display on-screen
     //stringstream reportStream;    
 };
