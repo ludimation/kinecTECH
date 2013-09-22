@@ -45,6 +45,7 @@ public:
 #endif
 	
 	ofxCvColorImage colorImg;
+	ofxCvColorImage colorImgMultiply;
 	
 	ofxCvGrayscaleImage grayImage; // grayscale depth image
 	ofxCvGrayscaleImage grayThreshNear; // the near thresholded image
@@ -74,5 +75,5 @@ private:
     int screenID;
     
     // reportstream for text to display on-screen
-    stringstream reportStream;    
+    //stringstream reportStream;    
 };

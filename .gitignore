@@ -20,10 +20,10 @@ xcuserdata/
 [Bb]uild/*
 [Bb]uild/*
 
-# *.xcodeproj
-# config.make
-# Makefile
-# openFrameworks-Info.plist
-# Project.xcconfig
+*.xcodeproj
+config.make
+Makefile
+openFrameworks-Info.plist
+Project.xcconfig
 
 bin/*Debug*

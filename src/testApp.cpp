@@ -29,6 +29,7 @@ void testApp::setup() {
 	kinect2.open();
 #endif
 	
+    colorImgMultiply.allocate(kinect.width, kinect.height);
 	colorImg.allocate(kinect.width, kinect.height);
 	grayImage.allocate(kinect.width, kinect.height);
 	grayThreshNear.allocate(kinect.width, kinect.height);
@@ -71,7 +72,39 @@ void testApp::update() {
 		
 		// load grayscale depth image from the kinect source
 		grayImage.setFromPixels(kinect.getDepthPixels(), kinect.width, kinect.height);
-		
+
+        int numPixels = grayImage.getWidth() * grayImage.getHeight();
+        
+        ofxCvGrayscaleImage imageR = grayImage;
+        // work with red channel pixels to make them brighter
+        unsigned char * pixRED = imageR.getPixels();
+        for(int i = 0; i < numPixels; i++) {
+            int val = pixRED[i] * 1.5;
+            if (val > 255) {
+                val = 255;
+            }
+            pixRED[i] = val;
+        }
+        ofxCvGrayscaleImage imageB = imageR;
+        // work with blue channel pixels to make them all 255
+        unsigned char * pixBLUE = imageB.getPixels();
+        for(int i = 0; i < numPixels; i++) {
+            pixBLUE[i] = a;
+        }
+        ofxCvGrayscaleImage imageG = imageR;
+        // work with green channel pixels to make them all \
+        // twice as bright as red channel
+        unsigned char * pixGREEN = imageG.getPixels();
+        for(int i = 0; i < numPixels; i++) {
+            int val = 128 + pixGREEN[i]/2;
+            if (val > 255) { //clamp top at 255
+                val = 255;
+            }
+            pixGREEN[i] = val;
+        }
+		//colorImgMultiply.setFromGrayscalePlanarImages(imageG, imageG, imageG);
+		colorImgMultiply.setFromGrayscalePlanarImages(imageR, imageG, imageB);
+        
 		// we do two thresholds - one for the far plane and one for the near plane
 		// we then do a cvAnd to get the pixels which are a union of the two thresholds
 		if(bThreshWithOpenCV) {
@@ -110,11 +143,16 @@ void testApp::update() {
 
 //--------------------------------------------------------------
 void testApp::draw() {
-	
+    
+    // clear reportStream
+    stringstream reportStream;
+	//reportStream.str() = ""; //TODO: this still doesn't work
+    reportStream << "screenID = " << screenID << endl;
+
+    
     ////////////
     // draw screen based on display mode
     ////////////
-    cout << "screenID = " << screenID << endl;
     switch (screenID) {
             
         case 0: // 0 > debug
@@ -142,7 +180,6 @@ void testApp::draw() {
             
             // draw on-screen instructions
             ofSetColor(255, 255, 255);
-            // stringstream reportStream;
             
             if(kinect.hasAccelControl()) {
                 reportStream << "accel is: " << ofToString(kinect.getMksAccel().x, 2) << " / "
@@ -165,28 +202,144 @@ void testApp::draw() {
                 << "press 1-5 & 0 to change the led mode" << endl;
             }
             
-            ofDrawBitmapString(reportStream.str(), 20, 652);
+            //ofDrawBitmapString(reportStream.str(), 20, 652);
            
             break;
             
         case 1:
             // 1 > settings, instructions
             // 
+            ofBackground(255, 0, 128);
+            ofSetColor(255, 255, 255);
+
+            if(kinect.hasAccelControl()) {
+                reportStream << "accel is: " << ofToString(kinect.getMksAccel().x, 2) << " / "
+                << ofToString(kinect.getMksAccel().y, 2) << " / "
+                << ofToString(kinect.getMksAccel().z, 2) << endl;
+            } else {
+                reportStream << "Note: this is a newer Xbox Kinect or Kinect For Windows device," << endl
+                << "motor / led / accel controls are not currently supported" << endl << endl;
+            }
+            
+            reportStream // << "press p to switch between images and point cloud, rotate the point cloud with the mouse" << endl
+            << "using opencv threshold = " << bThreshWithOpenCV <<" (press spacebar)" << endl
+            << "set near threshold " << nearThreshold << " (press: + -)" << endl
+            << "set far threshold " << farThreshold << " (press: < >) num blobs found " << contourFinder.nBlobs
+            << ", fps: " << ofGetFrameRate() << endl
+            << "press c to close the connection and o to open it again, connection is: " << kinect.isConnected() << endl;
+            
+            if(kinect.hasCamTiltControl()) {
+                reportStream << "press UP and DOWN to change the tilt angle: " << angle << " degrees" << endl
+                << "press 1-5 & 0 to change the led mode" << endl;
+            }
+            
+            //ofDrawBitmapString(reportStream.str(), 20, 652);
+
             break;
             
         case 2: 
             // 2 > activity
             // 
+            ofBackground(0, 255, 255);
+            ofSetColor(255, 255, 255);
+            
+            //ofPushMatrix();
+            // the projected points are 'backwards' 
+            //ofScale(1, -1, 1);
+            if(bDrawPointCloud) {
+                easyCam.begin();
+                drawPointCloud();
+                easyCam.end();
+            } else {
+                
+                // show people how they can work with the pixels
+                unsigned char * pix = colorImgMultiply.getPixels();
+                
+                colorImgMultiply.mirror(false, true);
+                                
+                // draw from the live kinect
+                //colorImgMultiply.draw(0, 0, 1280, 800);
+                kinect.drawDepth(0, 0, 1280, 800); //drawDepth draws an ofTexture
+                colorImgMultiply.draw(-30, -30, 1340, 860);
+                // kinect.drawDepth(10, 10, 400, 300);
+                // kinect.draw(420, 10, 400, 300);
+                
+                // grayImage.draw(10, 320, 400, 300);
+                // contourFinder.draw(10, 320, 400, 300);
+                /*                
+                 #ifdef USE_TWO_KINECTS
+                 kinect2.draw(420, 320, 400, 300);
+                 #endif
+                 */
+            }
+            //ofPopMatrix();
+            
+            // draw on-screen instructions
+            ofSetColor(255, 255, 255);
+            // stringstream reportStream;
+            
+            if(kinect.hasAccelControl()) {
+                reportStream << "accel is: " << ofToString(kinect.getMksAccel().x, 2) << " / "
+                << ofToString(kinect.getMksAccel().y, 2) << " / "
+                << ofToString(kinect.getMksAccel().z, 2) << endl;
+            } else {
+                reportStream << "Note: this is a newer Xbox Kinect or Kinect For Windows device," << endl
+                << "motor / led / accel controls are not currently supported" << endl << endl;
+            }
+            
+            reportStream // << "press p to switch between images and point cloud, rotate the point cloud with the mouse" << endl
+            << "using opencv threshold = " << bThreshWithOpenCV <<" (press spacebar)" << endl
+            << "set near threshold " << nearThreshold << " (press: + -)" << endl
+            << "set far threshold " << farThreshold << " (press: < >) num blobs found " << contourFinder.nBlobs
+            << ", fps: " << ofGetFrameRate() << endl
+            << "press c to close the connection and o to open it again, connection is: " << kinect.isConnected() << endl;
+            
+            if(kinect.hasCamTiltControl()) {
+                reportStream << "press UP and DOWN to change the tilt angle: " << angle << " degrees" << endl
+                << "press 1-5 & 0 to change the led mode" << endl;
+            }
+            
+            //ofDrawBitmapString(reportStream.str(), 20, 652);
+            
+            
             break;
             
         case 3: 
             // 3 > workout stats, credits
             // 
+            ofBackground(128, 0, 255);
+            ofSetColor(255, 255, 255);
+            
+            if(kinect.hasAccelControl()) {
+                reportStream << "accel is: " << ofToString(kinect.getMksAccel().x, 2) << " / "
+                << ofToString(kinect.getMksAccel().y, 2) << " / "
+                << ofToString(kinect.getMksAccel().z, 2) << endl;
+            } else {
+                reportStream << "Note: this is a newer Xbox Kinect or Kinect For Windows device," << endl
+                << "motor / led / accel controls are not currently supported" << endl << endl;
+            }
+            
+            reportStream // << "press p to switch between images and point cloud, rotate the point cloud with the mouse" << endl
+            << "using opencv threshold = " << bThreshWithOpenCV <<" (press spacebar)" << endl
+            << "set near threshold " << nearThreshold << " (press: + -)" << endl
+            << "set far threshold " << farThreshold << " (press: < >) num blobs found " << contourFinder.nBlobs
+            << ", fps: " << ofGetFrameRate() << endl
+            << "press c to close the connection and o to open it again, connection is: " << kinect.isConnected() << endl;
+            
+            if(kinect.hasCamTiltControl()) {
+                reportStream << "press UP and DOWN to change the tilt angle: " << angle << " degrees" << endl
+                << "press 1-5 & 0 to change the led mode" << endl;
+            }
+            
+            //ofDrawBitmapString(reportStream.str(), 20, 652);
+            
             break;
         
         default:
             break;
     }
+    
+    ofDrawBitmapString(reportStream.str(), 20, 652);
 }
 
 void testApp::drawPointCloud() {
@@ -307,6 +460,33 @@ void testApp::keyPressed (int key) {
 			if(angle<-30) angle=-30;
 			kinect.setCameraTiltAngle(angle);
 			break;
+            
+        ////////////
+        // set screen to display
+        ////////////
+        // 0 > debug
+        // 1 > settings, instructions
+        // 2 > activity
+        // 3 > workout stats, credits
+
+        case 'd': 
+            screenID = 0; // display debug screen
+            break;
+
+        case 's': 
+            screenID = 1; // display settings, instructions screen
+            break;
+            
+        case 'a': 
+            screenID = 2; // display activity screen
+            break;
+            
+        case 'x': 
+            screenID = 3; // display workout stats, credits screen
+            break;
+            
+        default:
+            break;
 	}
 }
 
