@@ -1,0 +1,57 @@
+#ifndef _TEST_APP
+#define _TEST_APP
+
+#include "ofxOpenNI.h"
+#include "ofMain.h"
+
+#define MAX_DEVICES 2
+
+class testApp : public ofBaseApp{
+
+public:
+    
+	void setup();
+	void update();
+	void draw();
+    void exit();
+    
+	void keyPressed  (int key);
+	void keyReleased(int key);
+	void mouseMoved(int x, int y );
+	void mouseDragged(int x, int y, int button);
+	void mousePressed(int x, int y, int button);
+	void mouseReleased(int x, int y, int button);
+	void windowResized(int w, int h);
+
+    void userEvent(ofxOpenNIUserEvent & event);
+
+	ofxOpenNI       openNIDevices[MAX_DEVICES];
+    int             numDevices;
+    ofTrueTypeFont  verdana;
+    
+    
+private:
+    ////////////
+    // screenID value convention
+    ////////////
+    // 0 > debug
+    // 1 > settings, instructions
+    // 2 > activity
+    // 3 > workout stats, credits
+    int cloudRes;
+    int stopped;
+	int angle;
+    int screenID;
+    
+	ofTrueTypeFont		font;
+    ofTrueTypeFont      fontSMALL;
+    
+    string cals;
+    string labelCAL;
+    string bpm;
+    string labelBPM;
+    string messageSMALL;
+    
+};
+
+#endif
