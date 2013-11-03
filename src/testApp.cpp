@@ -33,10 +33,11 @@ void testApp::setup() {
     // 1 > settings, instructions
     // 2 > activity
     // 3 > workout stats, credits
-    screenID = 2; // 0 = debug, 1 = settings/instructions, 2 = activity, 3 = credits
+    screenID = 2; // 0; // 0 = debug, 1 = settings/instructions, 2 = activity, 3 = credits
 
-    cals = ofToString(ofRandom(1.284,  2.471));// (min, max)
-    cals = cals.substr(0, 5);
+    //cals = ofToString(ofRandom(1.284,  2.471));// (min, max)
+    //cals = cals.substr(0, 5);
+    cals = ofToString(0);
     bpm = ofToString(ofRandom(125, 185));
     bpm = bpm.substr(0, 5);
     labelCAL = "CALORIES PER MINUTE";
@@ -78,7 +79,7 @@ void testApp::setup() {
     // so it's safe to assume that the fist device to ask (ie., deviceID == 0) will have the user generator...
     
     // TODO: Is there a reason this was being limited to 1 before I commented it out?
-    // openNIDevices[0].setMaxNumUsers(1); // defualt is 4
+    openNIDevices[0].setMaxNumUsers(4); // default is 4
     ofAddListener(openNIDevices[0].userEvent, this, &testApp::userEvent);
     
     ofxOpenNIUser user;
@@ -129,6 +130,9 @@ void testApp::draw(){
     int windowW = ofGetWidth();
     int windowH = ofGetHeight();
     int windowMargin = 15; // how far from the top of the screen labels will draw
+    
+    // test to see if there are any recognized users so we can display vitals or not depending on this
+    int numUsers = openNIDevices[0].getNumTrackedUsers();
         
     ////////////
     // draw screen based on display mode
@@ -165,6 +169,7 @@ void testApp::draw(){
 
             displayActivity = true;
             displayHUD = true;
+            displayReport = true;
 
             break;
             
@@ -189,7 +194,8 @@ void testApp::draw(){
         << "Cloud Resolution = " << cloudRes <<" (press '1'–'5' to modify)" << endl
         << "Image On = " << openNIDevices[0].isImageOn() << "; Infrared On = " << openNIDevices[0].isInfraOn() << " (press 'i' to toggle between image and infra)" << endl
         << "Backbuffer = " << openNIDevices[0].getUseBackBuffer() <<" (press 'b' to toggle)" << endl
-        << "Millis: " << ofGetElapsedTimeMillis() << "; FPS: " << ofGetFrameRate() << endl
+        << "Millis: " << ofGetElapsedTimeMillis() << endl
+        << "FPS: " << ofGetFrameRate() << endl
         ;
         ofDrawBitmapString(reportStream.str(), windowMargin, windowH - 150);
     }
@@ -215,11 +221,15 @@ void testApp::draw(){
             ofxOpenNIUser & user = openNIDevices[0].getTrackedUser(nID);
             user.drawMask();
             ofPushMatrix();
-            ofTranslate(320, 240, -1000);
+            ofRotate(180, 0, 1, 0);
+            // ofTranslate(320, 240, -1000);
+            ofTranslate(320, 240, 0);
             user.drawPointCloud();
             ofPopMatrix();
         }
         ofDisableBlendMode();
+        ofPopMatrix();
+
         ofPopMatrix();
     }
     
@@ -247,6 +257,24 @@ void testApp::draw(){
             openNIDevices[deviceID].drawDepth(0, 0, 640, 480);
             openNIDevices[deviceID].drawSkeletons(0, 0, 640, 480);
 
+            /*
+            // do some drawing of user clouds and masks
+            ofPushMatrix();
+            ofEnableBlendMode(OF_BLENDMODE_ALPHA);
+            int numUsers = openNIDevices[0].getNumTrackedUsers();
+            for (int nID = 0; nID < numUsers; nID++){
+                ofxOpenNIUser & user = openNIDevices[0].getTrackedUser(nID);
+                user.drawMask();
+                ofPushMatrix();
+                ofRotate(180, 0, 1, 0);
+                // ofTranslate(320, 240, -1000);
+                ofTranslate(320, 240, 0);
+                user.drawPointCloud();
+                ofPopMatrix();
+            }
+            ofDisableBlendMode();
+            ofPopMatrix();
+            // */
         }
         
         ofPopMatrix();
@@ -255,50 +283,76 @@ void testApp::draw(){
     
     if (displayHUD) {
         // Update calories burned and bpm
-        if (ofGetElapsedTimeMillis() > 1000 ) {
-            cals = ofToString(ofRandom(1.284,  2.471));// (min, max)
-            cals = cals.substr(0, 5);
+        if (ofGetElapsedTimeMillis() > 1000 && numUsers) {
+            //cals = ofToString(ofRandom(1.284,  2.471));// (min, max)
+            //cals = cals.substr(0, 5);
+            int calIncrement = ofRandom(1.284,  2.471);// (min, max)
+            cals = ofToString(ofToInt(cals) + calIncrement);
             bpm = ofToString(ofRandom(125, 185));
             bpm = bpm.substr(0, 3);
-            
             ofResetElapsedTimeCounter();
+        } else {
+            if (!numUsers) {
+                cals = "0";
+                bpm = "0";
+            }
         }
-        
-        ofEnableAlphaBlending();
         
         // set label background dimensions
         int labelBGw = 350;
         int labelBGh = 145;
         int labelMargin = 5; // how far from eachother labels will draw
+
+        ofEnableAlphaBlending();
         
-        // draw relative to right of screen
+        // draw HUD relative to right of screen
         ofPushMatrix();
-        ofTranslate(windowW-labelBGw, windowMargin);
+        ofTranslate(windowW-labelBGw, -labelBGh);
         
-        // first lable
-        ofSetColor(255, 128, 0, 255); // bg
-        ofRect(0, 0, labelBGw, labelBGh);
-        ofSetColor(255, 255, 255); // text
-        fontSMALL.drawString(labelCAL, 15, 30);
-        font.drawString(cals, 15, 117);
+        int iMax;
+        if (numUsers) {
+            //iMax = numUsers; //TODO: fix this as it seems to be buggy at the moment
+            iMax = 1;
+        } else {
+            iMax = 1;
+        }
         
-        // draw next below previous lable
-        ofPushMatrix();
-        ofTranslate(0, (labelBGh + labelMargin)); 
+        for (int i = 0; i < iMax; i++) {
+            // draw next below previous lable
+            ofPushMatrix();
+            ofTranslate(0, (labelBGh + labelMargin)); 
+
+            // first lable
+            ofSetColor(255, 128, 0, 255); // bg
+            ofRect(0, 0, labelBGw, labelBGh);
+            ofSetColor(255, 255, 255); // text
+            fontSMALL.drawString(labelCAL, 15, 30);
+            font.drawString(cals, 15, 117);
+            //font.drawString(ofToString(ofToInt(cals) + ofRandom(-5, 5)), 15, 117);
+            
+            // draw next below previous lable
+            ofPushMatrix();
+            ofTranslate(0, (labelBGh + labelMargin)); 
+            
+            // second label
+            ofSetColor(255, 0, 255, 255); // bg
+            ofRect(0, 0, labelBGw, labelBGh);
+            ofSetColor(255, 255, 255); // text
+            fontSMALL.drawString(labelBPM,  15, 30);
+            font.drawString(bpm, 15, 117);
+            //font.drawString(ofToString(ofToInt(bpm) + ofRandom(-5, 5)), 15, 117);
+        }
         
-        // second label
-        ofSetColor(255, 0, 255, 255); // bg
-        ofRect(0, 0, labelBGw, labelBGh);
-        ofSetColor(255, 255, 255); // text
-        fontSMALL.drawString(labelBPM,  15, 30);
-        font.drawString(bpm, 15, 117);
+        // reset matrixes for labels
+        for (int i = 0; i < iMax; i++) {
+            ofPopMatrix();
+            ofPopMatrix();
+        }
         
-        // reset matrix
+        // reset matrix for HUD
         ofPopMatrix();
-        ofPopMatrix();
-        
+
         ofDisableAlphaBlending();
-        
     }
 }
 
