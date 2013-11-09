@@ -47,8 +47,31 @@ void testApp::setup() {
     screenID = 2; // 0; // 0 = debug, 1 = settings/instructions, 2 = activity, 3 = credits
     instability = 440.0f; // used in screenShake and screenFlicker--is based off legacy frequency calculations and should eventually normalized to more understandable numbers 
     heightPct = 0.5f;
-    blendMode = OF_BLENDMODE_ALPHA;
-    
+    blendMode = OF_BLENDMODE_ALPHA;    
+    /* 	
+     enum ofBlendMode {
+         OF_BLENDMODE_DISABLED  = 0,
+         OF_BLENDMODE_ALPHA     = 1,
+         OF_BLENDMODE_ADD       = 2,
+         OF_BLENDMODE_SUBTRACT  = 3,
+         OF_BLENDMODE_MULTIPLY  = 4,
+         OF_BLENDMODE_SCREEN    = 5
+     };
+     */
+    depthColoring = COLORING_PSYCHEDELIC;
+    /* 
+     enum DepthColoring {
+         COLORING_PSYCHEDELIC_SHADES    = 0,
+         COLORING_PSYCHEDELIC           = 1,
+         COLORING_RAINBOW               = 2,
+         COLORING_CYCLIC_RAINBOW        = 3, // default value in ofxOpenNI
+         COLORING_BLUES                 = 4,
+         COLORING_GREY                  = 5,
+         COLORING_STATUS                = 6,       
+         COLORING_COUNT                 = 7
+     };
+     */
+
     
     ////////////
     // setup HUD elements like fonts, and labels
@@ -56,14 +79,6 @@ void testApp::setup() {
 	font.loadFont("franklinGothic.otf", 72);
     fontSMALL.loadFont("franklinGothic.otf", 18);
     verdana.loadFont(ofToDataPath("verdana.ttf"), 24);
-    /* 	
-     OF_BLENDMODE_DISABLED  = 0
-     OF_BLENDMODE_ALPHA     = 1
-     OF_BLENDMODE_ADD       = 2
-     OF_BLENDMODE_SUBTRACT  = 3
-     OF_BLENDMODE_MULTIPLY  = 4
-     OF_BLENDMODE_SCREEN    = 5
-     */
     //cals = ofToString(ofRandom(1.284,  2.471));// (min, max)
     //cals = cals.substr(0, 5);
     cals = ofToString(0);
@@ -439,6 +454,19 @@ void testApp::draw(){
             ofScale(pct, pct, 0.0f);
             ofTranslate(x + offsetX, y + offsetY, 0.0f);
 
+            openNIDevices[deviceID].setDepthColoring(depthColoring); // COLORING_CYCLIC_RAINBOW by default
+            /*
+            enum DepthColoring {
+                COLORING_PSYCHEDELIC_SHADES = 0,
+                COLORING_PSYCHEDELIC,
+                COLORING_RAINBOW,
+                COLORING_CYCLIC_RAINBOW,
+                COLORING_BLUES,
+                COLORING_GREY,
+                COLORING_STATUS,
+                COLORING_COUNT
+            };
+            //*/
             openNIDevices[deviceID].drawDepth(0, 0, 640, 480);
             // openNIDevices[deviceID].drawSkeletons(0, 0, 640, 480);
 
@@ -586,17 +614,25 @@ void testApp::exit(){
 void testApp::keyPressed(int key){
     cloudRes = -1;
     switch (key) {
+        
+        
+        ////////////
+        // handle cloudRes (TODO: clean since I don't use it anymore?)
+        // and BlendMode to be used used in .draw()
+        ////////////
+        /* 	
+             enum ofBlendMode {
+             OF_BLENDMODE_DISABLED  = 0,
+             OF_BLENDMODE_ALPHA     = 1,
+             OF_BLENDMODE_ADD       = 2,
+             OF_BLENDMODE_SUBTRACT  = 3,
+             OF_BLENDMODE_MULTIPLY  = 4,
+             OF_BLENDMODE_SCREEN    = 5
+         };
+         */
         case '0':
             cloudRes = 1;
             blendMode = OF_BLENDMODE_DISABLED;
-            /* 	
-             OF_BLENDMODE_DISABLED  = 0
-             OF_BLENDMODE_ALPHA     = 1
-             OF_BLENDMODE_ADD       = 2
-             OF_BLENDMODE_SUBTRACT  = 3
-             OF_BLENDMODE_MULTIPLY  = 4
-             OF_BLENDMODE_SCREEN    = 5
-             */
             break;
         case '1':
             cloudRes = 1;
@@ -618,6 +654,52 @@ void testApp::keyPressed(int key){
             blendMode = OF_BLENDMODE_SCREEN;
             cloudRes = 5;
             break;
+
+        
+        ////////////
+        // handle color scheme for depth buffer to be used used in .draw()
+        ////////////
+        /* 
+         enum DepthColoring {
+             COLORING_PSYCHEDELIC_SHADES    = 0,
+             COLORING_PSYCHEDELIC           = 1,
+             COLORING_RAINBOW               = 2,
+             COLORING_CYCLIC_RAINBOW        = 3, // default value in ofxOpenNI
+             COLORING_BLUES                 = 4,
+             COLORING_GREY                  = 5,
+             COLORING_STATUS                = 6,       
+             COLORING_COUNT                 = 7
+         };
+         */
+        case ')': // SHIFT + 0
+            depthColoring = COLORING_PSYCHEDELIC_SHADES; 
+            break;
+        case '!': // SHIFT + 1
+            depthColoring = COLORING_PSYCHEDELIC; 
+            break;
+        case '@': // SHIFT + 2
+            depthColoring = COLORING_RAINBOW; // default value for depthColoring enum in ofxOpenNI
+            break;
+        case '#': // SHIFT + 3
+            depthColoring = COLORING_CYCLIC_RAINBOW;
+           break;
+        case '$': // SHIFT + 4
+            depthColoring = COLORING_BLUES;
+            break;
+        case '%': // SHIFT + 5
+            depthColoring = COLORING_GREY;
+            break;
+        case '^': // SHIFT + 6
+            depthColoring = COLORING_STATUS;
+            break;
+        case '&': // SHIFT + 7
+            depthColoring = COLORING_COUNT;
+            break;
+            
+            
+        ////////////
+        // handle some hardware settings
+        ////////////
         case 'x': // stop all devices
             // TODO: trouble-shoot this
             for (int deviceID = 0; deviceID < numDevices; deviceID++){
@@ -633,6 +715,8 @@ void testApp::keyPressed(int key){
             }
             stopped = false;
             break;
+            
+            
         case 'i': // toggle between infrared and image generators
             for (int deviceID = 0; deviceID < numDevices; deviceID++){
                 if (openNIDevices[deviceID].isImageOn()){
