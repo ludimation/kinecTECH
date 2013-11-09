@@ -422,14 +422,16 @@ void testApp::draw(){
             //        openNIDevices[deviceID].drawImage(640, 0, 640, 480);
             //        openNIDevices[deviceID].drawSkeletons(640, 0, 640, 480);
             
-            int pctW = windowW / 640 + 0.05f;
-            int pctH = windowH / 480 + 0.05f;
+            int pctW = windowW / 640 + 0.15f;
+            int pctH = windowH / 480 + 0.15f;
             int pct = MAX(pctW, pctH);
+            int offsetX = 0;
+            int offsetY = 30;
             int x = (windowW / 2) - (640 * pct / 2);
             int y = (windowH / 2) - (480 * pct / 2);
             
             ofScale(pct, pct);
-            ofTranslate(x, y);
+            ofTranslate(x + offsetX, y + offsetY);
             openNIDevices[deviceID].drawDepth(0, 0, 640, 480);
             // openNIDevices[deviceID].drawSkeletons(0, 0, 640, 480);
 
