@@ -80,8 +80,6 @@ void testApp::setup() {
 	font.loadFont("franklinGothic.otf", 72);
     fontSMALL.loadFont("franklinGothic.otf", 18);
     verdana.loadFont(ofToDataPath("verdana.ttf"), 24);
-    //cals = ofToString(ofRandom(1.284,  2.471));// (min, max)
-    //cals = cals.substr(0, 5);
     cals = ofToString(0);
     bpm = ofToString(ofRandom(125, 185));
     bpm = bpm.substr(0, 5);
@@ -119,15 +117,14 @@ void testApp::setup() {
 
         // setup the hand generator
         openNIDevices[deviceID].addHandsGenerator();
+        
+        // add all focus gestures (ie., wave, click, raise arm)
+        openNIDevices[deviceID].addAllHandFocusGestures();
         // or you can add them one at a time
         //vector<string> gestureNames = openNIDevice.getAvailableGestures(); // you can use this to get a list of gestures
         // prints to console and/or you can use the returned vector
         //openNIDevice.addHandFocusGesture("Wave");
-                
-        // add all focus gestures (ie., wave, click, raise arm)
-        openNIDevices[deviceID].addAllHandFocusGestures();
 
-        
 		openNIDevices[deviceID].start();
     }
     
@@ -150,19 +147,21 @@ void testApp::setup() {
                                              // allows you to set all tracked user properties to the same type easily
                                              // and allows you to create your own user class that inherits from ofxOpenNIUser
     
+    /*
     // if you want to get fine grain control over each possible tracked user for some reason you can iterate
     // through users like I'm doing below. Please not the use of nID = 1 AND nID <= openNIDevices[0].getMaxNumUsers()
     // as what you're doing here is retrieving a user that is being stored in a std::map using it's XnUserID as the key
     // that means it's not a 0 based vector, but instead starts at 1 and goes up to, and includes maxNumUsers...
-//    for (XnUserID nID = 1; nID <= openNIDevices[0].getMaxNumUsers(); nID++){
-//        ofxOpenNIUser & user = openNIDevices[0].getUser(nID);
-//        user.setUseMaskTexture(true);
-//        user.setUsePointCloud(true);
-//        //user.setUseAutoCalibration(false); // defualts to true; set to false to force pose detection
-//        //user.setLimbDetectionConfidence(0.9f); // defaults 0.3f
-//        user.setPointCloudDrawSize(2);
-//        user.setPointCloudResolution(1);
-//    }
+    for (XnUserID nID = 1; nID <= openNIDevices[0].getMaxNumUsers(); nID++){
+        ofxOpenNIUser & user = openNIDevices[0].getUser(nID);
+        user.setUseMaskTexture(true);
+        user.setUsePointCloud(true);
+        //user.setUseAutoCalibration(false); // defualts to true; set to false to force pose detection
+        //user.setLimbDetectionConfidence(0.9f); // defaults 0.3f
+        user.setPointCloudDrawSize(2);
+        user.setPointCloudResolution(1);
+    }
+    //*/
     
 }
 
