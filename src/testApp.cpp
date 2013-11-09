@@ -258,13 +258,13 @@ void testApp::draw(){
     bool    screenFlicker   = false;
     
     // get width and height of window for positioning of calories burned labels
-    int windowW = ofGetWidth();
-    int windowH = ofGetHeight();
-    int windowMargin = 15; // how far from the top of the screen labels will draw
+    float windowW = ofGetWidth();
+    float windowH = ofGetHeight();
+    float windowMargin = 15; // how far from the top of the screen labels will draw
     
     // test to see if there are any recognized users so we can display vitals or not depending on this
     int numUsers = openNIDevices[0].getNumTrackedUsers();
-        
+          
     ////////////
     // draw screen based on display mode
     ////////////
@@ -406,10 +406,10 @@ void testApp::draw(){
         ofBackground(16     + ofRandom( pow(instability, mult)      / pow(2048.0f, mult ) ), 
                      64     + ofRandom( pow(instability, mult)      / pow(2048.0f, mult ) ),
                      128    + ofRandom( pow(instability, mult)      / pow(2048.0f, mult ) ) );
-//        ofSetColor(     16     + ofRandom( pow(instability, mult)      / pow(2048.0f, mult ) ), 
-//                   64     + ofRandom( pow(instability, mult)      / pow(2048.0f, mult ) ),
-//                   128    + ofRandom( pow(instability, mult)      / pow(2048.0f, mult ) ) );
-//        ofRectangle(0, 0, 640, 480);
+        //        ofSetColor(     16     + ofRandom( pow(instability, mult)      / pow(2048.0f, mult ) ), 
+        //                   64     + ofRandom( pow(instability, mult)      / pow(2048.0f, mult ) ),
+        //                   128    + ofRandom( pow(instability, mult)      / pow(2048.0f, mult ) ) );
+        //        ofRectangle(0, 0, 640, 480);
     }
     else {
         // ofBackground(16, 64, 128);
@@ -445,11 +445,11 @@ void testApp::draw(){
             float pctW  = windowW  * 1.15f     / 640.0f;
             float pctH  = windowH  * 1.15f     / 480.0f;
             float pct   = MAX(pctW, pctH);
-            float offsetX   =   0.0f;
-            float offsetY   =  45.0f;
+            float offsetX   =   50.0f;
+            float offsetY   =   30.0f;//45.0f;
             
-            float x = (windowW / 2.0f) - (640.0f * pct / 2.0f);
-            float y = (windowH / 2.0f) - (480.0f * pct / 2.0f);
+            float x = (windowW - (640.0f * pct)) / 2.0f;
+            float y = (windowH - (480.0f * pct)) / 2.0f;
 
             ofScale(pct, pct, 0.0f);
             ofTranslate(x + offsetX, y + offsetY, 0.0f);
@@ -467,6 +467,7 @@ void testApp::draw(){
                 COLORING_COUNT
             };
             //*/
+            
             openNIDevices[deviceID].drawDepth(0, 0, 640, 480);
             // openNIDevices[deviceID].drawSkeletons(0, 0, 640, 480);
 
