@@ -5,8 +5,11 @@
 #include "ofxParticleEmitter.h"
 #include "partisynth.h"
 
-class partisynthmngr {
+class PartisynthMngr {
 public:
+    
+    PartisynthMngr();
+    ~PartisynthMngr();
     
     void setup();
     void update();
@@ -25,9 +28,9 @@ public:
     // TODO: partisynth-handling properties and functions need to be defined
     void updateSizeAdustments();
     
-    int     numPartisynths;
+    int                 numPartisynths;
     vector <Partisynth> partisynths;
-    int updatePartisynths;
+    int                 updatePartisynths;
     
     // TODO: can this be moved into partisynth object?
     void audioOut(float * input, int bufferSize, int nChannels);

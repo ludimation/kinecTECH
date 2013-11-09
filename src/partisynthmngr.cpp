@@ -5,59 +5,81 @@
 // - James M's contributions: 1) working through math for linear tone/mouse relationship, and 2) square wave
 
 // TODO:
+// - get particles to show up in testApp
+// - hook up locations of partisynths to hand points
 // - debug elaphantitis of 8th particle system (being huge when it shouldn't be)
-// - clean remnants of Partisynth code out from testApp since it no longer synthesizes anything or has any particles
+// - move Partisynths into structs instead, making this document the one that defines the Partysinth class
 // - kinput > use kinetic data to drive partisynth pan (x), pitch (y), and volume (z)
 // - aggregate screenshake, and screenflicker into main app so that any user can affect it
 // - init() > has soundstream issues > should make this into a global "setup" function that can be called from testApp instead of having to be inside testApp so it can be packaged with "synth" when I make that into an addon
 
+PartisynthMngr::PartisynthMngr(){
+    return;
+}
+
+PartisynthMngr::~PartisynthMngr() {
+
+    if (partisynths.size() != 0 ) {
+        for (int i = 0; i < partisynths.size(); i++) {
+            partisynths[i].exit();
+        }
+        partisynths.clear();
+    }
+
+}
+
 //--------------------------------------------------------------
-void partisynthmngr::setup(){
+void PartisynthMngr::setup(){
     
-    ofSetVerticalSync(TRUE);
-	ofSetFrameRate(60);
+    ////////////////
+    // Setup partisynths
+    ////////////////
     updatePartisynths = 0;
-    
     numPartisynths = 8;
-    // numPartisynths = 0;
-    
     // Partisynth creation
     partisynths.clear();
     for (int i=0; i < numPartisynths; i++) {
         Partisynth ps;
         partisynths.push_back(ps);
     }
-    
 	// Partisynth initialization
     for (int i=0; i < partisynths.size(); i++) {
         partisynths[i].init(0.5f);
     }
-    
     numPartisynths = 1;
     
-    
+    /*
+    ////////////////
+    // set up emitters //TODO: clean up manager to handle partisynths as structs instead of objects
+    ////////////////
     // populate emitters list
+    updateParticleTexture       = true;
+    xmlFilename                 = "circles_subdued.pex";
+    texFilename                 = "0005_circle.png";
     numEmitters = 3;
     emitters.clear();
     for (int i=0; i < numEmitters; i++) {
         ofxParticleEmitter emitter;
         emitters.push_back(emitter);
     }
-
 	// load emitter settings from XML
     for (int i=0; i < emitters.size(); i++) {
-        if ( !emitters[i].loadFromXml( "circles_subdued.pex"/*"drugs_subdued.pex"*/ ) )
+        if ( !emitters[i].loadFromXml( "circles_subdued.pex") )
         {
             ofLog( OF_LOG_ERROR, "testApp::setup() - failed to load emitter[" + ofToString(i) + "] config" );
         }    
     }
+    //*/
     
+    ////////////////
+    // Set up audio channels
+    ////////////////
 	// 2 output channels,
 	// 0 input channels
 	// 22050 samples per second
 	// 512 samples per buffer
 	// 4 num buffers (latency)
-	
+	// TODO: clean this mess up once I start handling partisynths as structs
 	int bufferSize              = 512;
 	sampleRate                  = 44100;
 	phase                       = 0;
@@ -73,110 +95,90 @@ void partisynthmngr::setup(){
     volumeFrequencyAdjustment   = 1.0f;
     volumeWaveformAdjustment    = 0.9995f; // will sort of not work if you assign any values >=1.0f
     volumeAdjustment            = volumeFrequencyAdjustment * volumeWaveformAdjustment;
-    
-    updateParticleTexture       = true;
-    xmlFilename                 = "circles_subdued.pex";
-    texFilename                 = "0005_circle.png";
-    
-    screenID                    = 'e';
-    
     // ===============----
-
 	lAudio.assign(bufferSize, 0.0);
 	rAudio.assign(bufferSize, 0.0);
-	
 	//soundStream.listDevices();
-	
 	//if you want to set the device id to be different than the default
 	//soundStream.setDeviceID(1); 	//note some devices are input only and some are output only 
-
 	// soundStream.setup(this, 2, 0, sampleRate, bufferSize, 4);
-    
     setPhaseAdderTarget();
+
+    
+    ////////////////
+    // Initialize screenID
+    ////////////////
+    screenID                    = 'e';
+    
+    
 }
 
 
 //--------------------------------------------------------------
-void partisynthmngr::update(){
+void PartisynthMngr::update(){ //TODO: accept an array of points to put partisynths at
     
     ///*
-    
+    // increase or decrease number of active partisynths if necessary
+    // TODO:
+    // if numPartisynths != points.size()
+    //      if numPartisynths < points.size() // points array coming in
+    //          updatePartisynths = 1;
+    //      else
+    //          updateParisynths = -1;
+    // 
     if (updatePartisynths > 0 ) {
-        cout << "====" << endl;
-        cout << "== update() ==" << endl;
-        cout << "updatePartisynths = 1" << endl;
-        cout << "numPartisynths = " << numPartisynths << endl;
-        cout << "partisynths.size() = " << partisynths.size() << endl;
-
         if (partisynths.size() == numPartisynths) {
-            /*
-            cout << "(parti partisynths.size() == numPartisynths) = true"
-            << endl;
-            cout << "creating new partisynth" << endl;
             Partisynth ps;
             partisynths.push_back(ps);
-            cout << "partisynths.size() = " << partisynths.size() << endl;
-             */
         } else {
-            cout << "initializing: partisynths[" << numPartisynths << "]" << endl;
             partisynths[partisynths.size() - 1].init();
-            cout << "incrementing: numPartisynths " << endl;
             numPartisynths++;
-            cout << "numPartisynths = " << numPartisynths << endl;
-            cout << "====" << endl;
-            
             updateSizeAdustments();
         }
         updatePartisynths = 0;
     } else if (updatePartisynths < 0){
         if (numPartisynths > 1) {
-            cout << "====" << endl;
-            cout << "== update() ==" << endl;
-            cout << "updatePartisynths = -1" << endl;
-            cout << "numPartisynths = " << numPartisynths << endl;
-            cout << "partisynths.size() = " << partisynths.size() << endl;
-
-            cout << "decrementing: numPartisynths " << endl;
             numPartisynths--;
-            cout << "numPartisynths = " << numPartisynths << endl;
             // partisynths[numPartisynths].exit();
-            cout << "====" << endl;
-
             updateSizeAdustments();
         }
         updatePartisynths = 0;
     }
     //*/
 
-    
     // Partisynth updates
+    // TODO: is this necessary? Does calling ".mouseMoved()" pretty much do the same thing here?
     if (numPartisynths > 0) {
         for (int i=0; i < numPartisynths; i++) {
             // TODO: Do I need some kind of test in here to make sure partisynths[i] exists?
             // if (partisynths[i].active)
-                partisynths[i].update();
+            partisynths[i].update();
         }
     }
     
     // Partisynth mouse moved calls
+    //TODO: use the passed array of points for partisynth locations instead
     for (int i=0; i < numPartisynths; i++) {
+        // x = points[i].x
+        // y = points[i].y
         int x = ofGetMouseX();
         int y = ofGetMouseY();
         // set default values so partisynths don't get stuck in the upper left of the screen
-        if (!x && !y) {
+        if (!x && !y) { //TODO: clean this up? Not sure it's necessary any more
             x = ofGetWidth() / 2.0f;
             y = ofGetHeight() / 2.0f;
         }
-        float rps = 1.0f / (i+1);
+        float rps = 1.0f / (i+1); //TODO: should revolutions per second eventually be relative to something other than "i"? freaquency maybe?
         float seconds = ofGetElapsedTimeMillis() / 1000.0f; // TODO: should eventually use beats to relate this to music more instead of seconds
         float radians = TWO_PI * seconds * rps; 
-        partisynths[i].mouseMoved(x + 100 * i * sin(radians), y + 100 * i * cos(radians));
+        partisynths[i].mouseMoved(x + 100 * (i+1) * sin(radians), y + 100 * i * cos(radians));
+        // TODO: would still like to keep orbiting behavior, but remove some of the "i" relative stuff
     }
     
     updateEmitters();
 }
 
-void partisynthmngr::updateSizeAdustments(){
+void PartisynthMngr::updateSizeAdustments(){
     float sizeAdjustment = sqrt(sqrt(1.0f / (float)numPartisynths));
     cout << "====" << endl;
     cout << "updateSizeAdustments(): sizeAdjustment = " << sizeAdjustment << endl;
@@ -189,7 +191,8 @@ void partisynthmngr::updateSizeAdustments(){
     cout << "====" << endl;
 }
 
-void partisynthmngr::updateEmitters(){
+// TODO: clean up this mess
+void PartisynthMngr::updateEmitters(){
     for (int i=0; i < emitters.size(); i++) {
         if (updateParticleTexture) {
             emitters[i].loadFromXml(xmlFilename);
@@ -235,7 +238,7 @@ void partisynthmngr::updateEmitters(){
 
 }
 
-void partisynthmngr::updateProperties(){
+void PartisynthMngr::updateProperties(){
 
     int x = ofGetMouseX();
     int y = ofGetMouseY();
@@ -243,7 +246,7 @@ void partisynthmngr::updateProperties(){
     updateProperties(x, y);    
 }
 
-void partisynthmngr::updateProperties(int x, int y){
+void PartisynthMngr::updateProperties(int x, int y){
     
     int width = ofGetWidth();
 	float height = ofGetHeight();
@@ -272,7 +275,7 @@ void partisynthmngr::updateProperties(int x, int y){
 }
 
 //--------------------------------------------------------------
-void partisynthmngr::draw(){
+void PartisynthMngr::draw(){
     
   
     string  screenLabel         = "PARTISYNTH";
@@ -317,15 +320,35 @@ void partisynthmngr::draw(){
                     ofRandomf() * volume * pow(targetFrequency,mult/2)  / pow(2000.0f, mult/2) );        
     }
 
+    ofPushStyle();
+    ofEnableBlendMode(OF_BLENDMODE_ADD);
+    /* 	
+     OF_BLENDMODE_DISABLED  = 0
+     OF_BLENDMODE_ALPHA     = 1
+     OF_BLENDMODE_ADD       = 2
+     OF_BLENDMODE_SUBTRACT  = 3
+     OF_BLENDMODE_MULTIPLY  = 4
+     OF_BLENDMODE_SCREEN    = 5
+    */
+    ///*
     if (screenFlicker) {
         float mult = 5;
-        ofBackground(16     + ofRandom( pow(targetFrequency, mult)      / pow(2048.0f, mult ) ), 
+/*        ofBackground(16     + ofRandom( pow(targetFrequency, mult)      / pow(2048.0f, mult ) ), 
                      64     + ofRandom( pow(targetFrequency, mult)      / pow(2048.0f, mult ) ),
                      128    + ofRandom( pow(targetFrequency, mult)      / pow(2048.0f, mult ) ) );
+*/
+        ofSetColor(     16     + ofRandom( pow(targetFrequency, mult)      / pow(2048.0f, mult ) ), 
+                        64     + ofRandom( pow(targetFrequency, mult)      / pow(2048.0f, mult ) ),
+                        128    + ofRandom( pow(targetFrequency, mult)      / pow(2048.0f, mult ) ) );
+        ofRectangle(0, 0, 640, 480);
     }
     else {
-        ofBackground(16, 64, 128);
-    }
+        // ofBackground(16, 64, 128);
+        ofSetColor(16, 64, 128);
+        ofRectangle(0, 0, 640, 480);
+    } //*/
+    ofDisableBlendMode();
+    ofPopStyle();
 
     if (drawInstructions) {
         // instructions
@@ -468,7 +491,7 @@ void partisynthmngr::draw(){
 
 
 //--------------------------------------------------------------
-void partisynthmngr::keyPressed  (int key){
+void PartisynthMngr::keyPressed  (int key){
     
     for (int i = 0; i < partisynths.size(); i++){ 
         // keyPressed event needs to be passed to all partisynths so waveformes remain consistent
@@ -558,31 +581,31 @@ void partisynthmngr::keyPressed  (int key){
 }
 
 //--------------------------------------------------------------
-void partisynthmngr::keyReleased  (int key){
+void PartisynthMngr::keyReleased  (int key){
 
 }
 
 //--------------------------------------------------------------
-void partisynthmngr::mouseMoved(int x, int y ){
+void PartisynthMngr::mouseMoved(int x, int y ){
     
     updateProperties(x, y);
     
 }
 
 //--------------------------------------------------------------
-void partisynthmngr::setPhaseAdderTarget () {
+void PartisynthMngr::setPhaseAdderTarget () {
     phaseAdderTarget = (targetFrequency / (float) sampleRate) * TWO_PI;
 }
 
 //--------------------------------------------------------------
-void partisynthmngr::mouseDragged(int x, int y, int button){
+void PartisynthMngr::mouseDragged(int x, int y, int button){
 
     mouseMoved(x, y);
 
 }
 
 //--------------------------------------------------------------
-void partisynthmngr::mousePressed(int x, int y, int button){
+void PartisynthMngr::mousePressed(int x, int y, int button){
 	bNoise = true;
     
     cout << "====" << endl;
@@ -616,7 +639,7 @@ void partisynthmngr::mousePressed(int x, int y, int button){
 
 
 //--------------------------------------------------------------
-void partisynthmngr::mouseReleased(int x, int y, int button){
+void PartisynthMngr::mouseReleased(int x, int y, int button){
 	bNoise = false;
 
     // hand event down to active particles so they get mouse pressed functions
@@ -626,12 +649,12 @@ void partisynthmngr::mouseReleased(int x, int y, int button){
 }
 
 //--------------------------------------------------------------
-void partisynthmngr::windowResized(int w, int h){
+void PartisynthMngr::windowResized(int w, int h){
 
 }
 
 //--------------------------------------------------------------
-void partisynthmngr::audioOut(float * output, int bufferSize, int nChannels){
+void PartisynthMngr::audioOut(float * output, int bufferSize, int nChannels){
     
     // clear audio buffers
     for (int i = 0; i < bufferSize; i++){
@@ -646,11 +669,11 @@ void partisynthmngr::audioOut(float * output, int bufferSize, int nChannels){
 }
 
 //--------------------------------------------------------------
-void partisynthmngr::gotMessage(ofMessage msg){
+void PartisynthMngr::gotMessage(ofMessage msg){
 
 }
 
 //--------------------------------------------------------------
-void partisynthmngr::dragEvent(ofDragInfo dragInfo){ 
+void PartisynthMngr::dragEvent(ofDragInfo dragInfo){ 
 
 }

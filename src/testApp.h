@@ -24,6 +24,8 @@ public:
 	void mouseReleased(int x, int y, int button);
 	void windowResized(int w, int h);
 
+    void audioOut(float * input, int bufferSize, int nChannels);
+
     void userEvent(ofxOpenNIUserEvent & event);
     void handEvent(ofxOpenNIHandEvent & event);
 
@@ -55,6 +57,7 @@ private:
     // string messageSMALL; // TODO: cleanup? Not sure this is used anywhere
     
     ofSoundStream       soundStream;
+    PartisynthMngr      partisynthmngr;
     
 };
 

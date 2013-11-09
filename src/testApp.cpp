@@ -3,19 +3,37 @@
 //--------------------------------------------------------------
 void testApp::setup() {
     
+    ////////////
+    // setup screenID and hud elements 
+    ////////////
     ofSetLogLevel(OF_LOG_NOTICE);
-    
-    // set initial background color
-	ofBackground(255, 128, 0);
+    ofSetVerticalSync(TRUE);
+	ofSetFrameRate(60);
+	ofBackground(255, 128, 0);    // set initial background color
     ofResetElapsedTimeCounter();
     
-    // set up audio
+    
+    ////////////
+    // setup partisynth manager
+    ////////////
+    partisynthmngr.setup();
+    
+
+    ////////////
+    // setup soundstream
+    ////////////
+	// 2 output channels,
+	// 0 input channels
+	// 22050 samples per second
+	// 512 samples per buffer
+	// 4 num buffers (latency)
     int bufferSize              = 512;
 	int sampleRate              = 44100;
  	soundStream.setup(this, 2, 0, sampleRate, bufferSize, 4);
    
+    
     ////////////
-    // set screen to display
+    // setup screenID
     ////////////
     // 0 > debug
     // 1 > settings, instructions
@@ -23,18 +41,12 @@ void testApp::setup() {
     // 3 > workout stats, credits
     screenID = 2; // 0; // 0 = debug, 1 = settings/instructions, 2 = activity, 3 = credits
 
-    //cals = ofToString(ofRandom(1.284,  2.471));// (min, max)
-    //cals = cals.substr(0, 5);
-    cals = ofToString(0);
-    bpm = ofToString(ofRandom(125, 185));
-    bpm = bpm.substr(0, 5);
-    labelCAL = "CALORIES BURNED";
-    labelBPM = "HEARTBEATS PER MINUTE";
-    
+    ////////////
+    // setup fonts, blendMode, and HUD labels
+    ////////////    
 	font.loadFont("franklinGothic.otf", 72);
     fontSMALL.loadFont("franklinGothic.otf", 18);
     verdana.loadFont(ofToDataPath("verdana.ttf"), 24);
-
     blendMode = OF_BLENDMODE_ALPHA;
     /* 	
      OF_BLENDMODE_DISABLED  = 0
@@ -44,16 +56,22 @@ void testApp::setup() {
      OF_BLENDMODE_MULTIPLY  = 4
      OF_BLENDMODE_SCREEN    = 5
      */
+    //cals = ofToString(ofRandom(1.284,  2.471));// (min, max)
+    //cals = cals.substr(0, 5);
+    cals = ofToString(0);
+    bpm = ofToString(ofRandom(125, 185));
+    bpm = bpm.substr(0, 5);
+    labelCAL = "CALORIES BURNED";
+    labelBPM = "HEARTBEATS PER MINUTE";
 
+    ////////////
+    // set up kinects
+    ////////////
     cloudRes = -1;
     stopped = false;
-    
-    // zero the tilt on startup
-	angle = 0;
-    
+	angle = 0;    // zero the tilt on startup
     // setup Kinects and users
     numDevices = openNIDevices[0].getNumDevices();
-    
     for (int deviceID = 0; deviceID < numDevices; deviceID++){
         //openNIDevices[deviceID].setLogLevel(OF_LOG_VERBOSE); // ofxOpenNI defaults to ofLogLevel, but you can force to any level
         openNIDevices[deviceID].setup();
@@ -124,10 +142,12 @@ void testApp::setup() {
 
 //--------------------------------------------------------------
 void testApp::update(){
-    ofBackground(0, 0, 0);
+    // ofBackground(0, 0, 0);
     for (int deviceID = 0; deviceID < numDevices; deviceID++){
         openNIDevices[deviceID].update();
     }
+    
+    partisynthmngr.update(); // TODO: hand down a list of hand points
 }
 
 //--------------------------------------------------------------
@@ -231,6 +251,7 @@ void testApp::draw(){
             int numHands = openNIDevices[deviceID].getNumTrackedHands();
             
             // iterate through hands
+            // TODO, move this to .update() Function, store a list of hand locations to both print here in debug and hand to partisynthMngr during .update()
             for (int i = 0; i < numHands; i++){
                 
                 // get a reference to this user
@@ -240,6 +261,7 @@ void testApp::draw(){
                 ofPoint & handPosition = hand.getPosition();
                 // do something with the positions like:
                 
+                // TODO: Keep this part here, updating the above loop to iterate through hand positions list
                 // draw a rect at the position (don't confuse this with the debug draw which shows circles!!)
                 ofSetColor(255,0,0);
                 ofRect(handPosition.x, handPosition.y, 10, 10);
@@ -248,6 +270,9 @@ void testApp::draw(){
             reportStream
             << "Device[" << deviceID <<"] FPS: " + ofToString(openNIDevices[deviceID].getFrameRate()) << endl;
         }
+        
+        // draw particle emitters
+        partisynthmngr.draw();
         
         // do some drawing of user clouds and masks
         ofPushMatrix();
@@ -304,7 +329,7 @@ void testApp::draw(){
             openNIDevices[deviceID].drawDepth(0, 0, 640, 480);
             // openNIDevices[deviceID].drawSkeletons(0, 0, 640, 480);
 
-            // Draw hands
+            // Draw hands // see notes in debug above
             int numHands = openNIDevices[deviceID].getNumTrackedHands(); // get number of current hands
             for (int i = 0; i < numHands; i++){ // iterate through hands to drawn them
                 
@@ -321,6 +346,9 @@ void testApp::draw(){
                 // TODO: handle partisynths based on hand count and position
             }
             
+            // draw particle emitters
+            partisynthmngr.draw();
+
             /* // TODO: Would be nice to apply user masks in a more creative way
             // do some drawing of user clouds and masks
             ofPushMatrix();
@@ -339,7 +367,7 @@ void testApp::draw(){
             ofDisableBlendMode();
             ofPopMatrix();
             // */
-            
+                        
             reportStream
             << "Device[" << deviceID <<"] FPS: " + ofToString(openNIDevices[deviceID].getFrameRate()) << endl;
 
@@ -349,7 +377,6 @@ void testApp::draw(){
         ofPopMatrix();
     }
         
-    
     if (displayHUD) {
         // Update calories burned and bpm
         if (ofGetElapsedTimeMillis() > 1000 && numUsers) {
@@ -534,15 +561,16 @@ void testApp::keyPressed(int key){
             screenID = 0; // display debug screen
             break;
             
-        case 'e': 
+        case 'r': 
             screenID = 1; // display settings, instructions screen
             break;
             
+        case 'e': 
         case 'a': 
             screenID = 2; // display activity screen
             break;
             
-        case 'w': 
+        case 'f': 
             screenID = 3; // display workout stats, credits screen
             break;
         
@@ -552,6 +580,9 @@ void testApp::keyPressed(int key){
     for (int deviceID = 0; deviceID < numDevices; deviceID++){
 		//openNIDevices[deviceID].setPointCloudResolutionAllUsers(cloudRes);
 	}
+    
+    // Hand off key presses to other objects
+    partisynthmngr.keyPressed(key);
 }
 
 //--------------------------------------------------------------
@@ -562,21 +593,30 @@ void testApp::keyReleased(int key){
 //--------------------------------------------------------------
 void testApp::mouseMoved(int x, int y ){
 
+    // Hand off mouseMoved events to other objects
+    partisynthmngr.mouseMoved(x, y);
+    
 }
 
 //--------------------------------------------------------------
 void testApp::mouseDragged(int x, int y, int button){
 
+    mouseMoved(x, y);
+    
 }
 
 //--------------------------------------------------------------
 void testApp::mousePressed(int x, int y, int button){
 
+    partisynthmngr.mousePressed(x, y, button);
+    
 }
 
 //--------------------------------------------------------------
 void testApp::mouseReleased(int x, int y, int button){
 
+    partisynthmngr.mouseReleased(x, y, button);
+    
 }
 
 //--------------------------------------------------------------
@@ -584,3 +624,9 @@ void testApp::windowResized(int w, int h){
 
 }
 
+//--------------------------------------------------------------
+void testApp::audioOut(float * output, int bufferSize, int nChannels){
+    
+    partisynthmngr.audioOut(output, bufferSize, nChannels); 
+
+}
