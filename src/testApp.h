@@ -25,6 +25,8 @@ public:
 	void windowResized(int w, int h);
 
     void audioOut(float * input, int bufferSize, int nChannels);
+    void updateProperties(int x, int y);
+    void updateProperties();
 
     void userEvent(ofxOpenNIUserEvent & event);
     void handEvent(ofxOpenNIHandEvent & event);
@@ -34,6 +36,8 @@ public:
     int                 numDevices;
     enum ofBlendMode    blendMode;
     vector<ofPoint>     handPositions;
+    float               instability;
+    float               heightPct;
     
 private:
     ////////////

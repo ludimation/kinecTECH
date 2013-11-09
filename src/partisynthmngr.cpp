@@ -5,10 +5,11 @@
 // - James M's contributions: 1) working through math for linear tone/mouse relationship, and 2) square wave
 
 // TODO:
-// - aggregate screenshake, and screenflicker into testApp
-// - draw particle size according to z, make slower in general 
+// - tune screenFlicker and screenShake
+// - tune particle size according to z, make slower in general 
 // - tune particle colors per user/hand
 // - tune screen flicker colors to reflect hand/user color choices
+// - use a bone data to make pitch and screen instability relative to player's torso instead of camera bounds
 // - (obsolete once above is done?) debug elaphantitis of 8th particle system (being huge when it shouldn't be)
 // - move Partisynths into structs instead, making this document the one that defines the Partysinth class
 // - kinput > use kinetic data to drive partisynth pan (x), pitch (y), and volume (z)

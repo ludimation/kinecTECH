@@ -38,21 +38,23 @@ void testApp::setup() {
    
     
     ////////////
-    // setup screenID
+    // setup screenID, blendMode, and other display variables
     ////////////
     // 0 > debug
     // 1 > settings, instructions
     // 2 > activity
     // 3 > workout stats, credits
     screenID = 2; // 0; // 0 = debug, 1 = settings/instructions, 2 = activity, 3 = credits
+    instability = 440.0f; // used in screenShake and screenFlicker--is based off legacy frequency calculations and should eventually normalized to more understandable numbers 
+    heightPct = 0.5f;
+    blendMode = OF_BLENDMODE_ALPHA;
 
     ////////////
-    // setup fonts, blendMode, and HUD labels
+    // setup HUD elements like fonts, and labels
     ////////////    
 	font.loadFont("franklinGothic.otf", 72);
     fontSMALL.loadFont("franklinGothic.otf", 18);
     verdana.loadFont(ofToDataPath("verdana.ttf"), 24);
-    blendMode = OF_BLENDMODE_ALPHA;
     /* 	
      OF_BLENDMODE_DISABLED  = 0
      OF_BLENDMODE_ALPHA     = 1
@@ -147,34 +149,79 @@ void testApp::setup() {
 
 //--------------------------------------------------------------
 void testApp::update(){
-    // ofBackground(0, 0, 0);
-    for (int deviceID = 0; deviceID < numDevices; deviceID++){
-        openNIDevices[deviceID].update();
-    }
-    
 
-    // iterate through hands and store positions
+    // iterate through devices and hands to store positions
     handPositions.clear();
     if (numDevices) {
         for (int deviceID = 0; deviceID < numDevices; deviceID++){
+            openNIDevices[deviceID].update();
+
             int numHands = openNIDevices[deviceID].getNumTrackedHands(); // get number of current hands
             // TODO: store a list of hand locations to both print in debug and hand to partisynthMngr during .update()
-            for (int i = 0; i < numHands; i++){
-                
-                ofxOpenNIHand & hand = openNIDevices[deviceID].getTrackedHand(i); // get a reference to this hand
-                ofPoint & handPosition = hand.getPosition(); // get hand position
-                handPositions.push_back(handPosition); // store the positions
+            if (numHands) {
+                for (int i = 0; i < numHands; i++){
+                    
+                    ofxOpenNIHand & hand = openNIDevices[deviceID].getTrackedHand(i); // get a reference to this hand
+                    ofPoint & handPosition = hand.getPosition(); // get hand position
+                    handPositions.push_back(handPosition); // store the positions
+                }
+            }
+            else {
+                /*
+                ofPoint handPosition;
+                handPosition.x = 320; // x positions range from 0 (left) - 640 (right)
+                handPosition.y = 240; // y positions range from 0 (top) - 480 (bottom)
+                handPosition.z = 1850;// z positions range from about 600 (near) - 3000 (far)
+                handPositions.push_back(handPosition);
+                //*/
             }
         }
     }
-    else {
-        ofPoint handPosition;
-        handPosition.x = 320;
-        handPosition.y = 240;
-        handPositions.push_back(handPosition);
-    }
     partisynthmngr.update(handPositions);
+    updateProperties();
 }
+
+void testApp::updateProperties(){
+    
+    // TODO: Agregate Y + Z information from hands array to determine level of instability
+    float instabilityPct = 0.0f;
+    if (handPositions.size()) {
+        for (int i = 0; i < handPositions.size(); i++) {
+            // x positions range from 0 (left) - 640 (right)
+            float pctY =    1   - handPositions[i].y / 480.0f; // y positions range from 0 (top) - 480 (bottom)
+            float pctZ =    1   - (handPositions[i].z - 500.0f) / 2500.0f; // z positions range from about 500 (near) - 3000 (far)
+            instabilityPct += pctY * pctZ / handPositions.size();
+            cout << "handPositions["<<i<<"] = ("<<handPositions[i].x<<", "<<handPositions[i].y<<", "<<handPositions[i].z<<")"<<endl;
+        }
+    }
+
+    // exponential relationship between instabilityPct and instability
+ 	instability = 1000.0f * pow(1.059463094359f, instabilityPct*75.0f);
+}
+
+
+
+void testApp::updateProperties(int x, int y){
+    ///*
+    //int width = ofGetWidth();
+	//float height = ofGetHeight();
+    int width = 640; // use dimensions of Kinect output so they map well with it when drawn at this scale
+	float height = 480;
+    
+    // set default values so we don't get ridiculous pitches at start of program
+    if (!x && !y) {
+        x = width / 2.0f;
+        y = height / 2.0f;
+    }
+    
+    // pan = (float)x / (float)width;
+	heightPct = ((height-y) / height);
+    
+    // exponential relationship between instability and mouse Y -- could do this when in a "mouseFollow" mode
+ 	instability = 100.0f * pow(1.059463094359f, heightPct*75.0f);
+
+}
+
 
 //--------------------------------------------------------------
 void testApp::draw(){
@@ -314,12 +361,12 @@ void testApp::draw(){
         ofPopMatrix();
     }
     
-    /*
+    ///*
     if (screenShake) {
         int mult = 5;
-        ofTranslate(ofRandomf() * pow(targetFrequency,mult)    / pow(2000.0f, mult  ), 
-                    ofRandomf() * pow(targetFrequency,mult)    / pow(2000.0f, mult  ), 
-                    ofRandomf() * pow(targetFrequency,mult/2)  / pow(2000.0f, mult/2) );        
+        ofTranslate(ofRandomf() * pow(instability,mult)    / pow(2000.0f, mult  ), 
+                    ofRandomf() * pow(instability,mult)    / pow(2000.0f, mult  ), 
+                    ofRandomf() * pow(instability,mult/2)  / pow(2000.0f, mult/2) );        
     }
     //*/
     
@@ -333,15 +380,15 @@ void testApp::draw(){
      OF_BLENDMODE_MULTIPLY  = 4
      OF_BLENDMODE_SCREEN    = 5
      */
-    /*
+    ///*
     if (screenFlicker) {
         float mult = 5;
-        ofBackground(16     + ofRandom( pow(targetFrequency, mult)      / pow(2048.0f, mult ) ), 
-                     64     + ofRandom( pow(targetFrequency, mult)      / pow(2048.0f, mult ) ),
-                     128    + ofRandom( pow(targetFrequency, mult)      / pow(2048.0f, mult ) ) );
-//        ofSetColor(     16     + ofRandom( pow(targetFrequency, mult)      / pow(2048.0f, mult ) ), 
-//                   64     + ofRandom( pow(targetFrequency, mult)      / pow(2048.0f, mult ) ),
-//                   128    + ofRandom( pow(targetFrequency, mult)      / pow(2048.0f, mult ) ) );
+        ofBackground(16     + ofRandom( pow(instability, mult)      / pow(2048.0f, mult ) ), 
+                     64     + ofRandom( pow(instability, mult)      / pow(2048.0f, mult ) ),
+                     128    + ofRandom( pow(instability, mult)      / pow(2048.0f, mult ) ) );
+//        ofSetColor(     16     + ofRandom( pow(instability, mult)      / pow(2048.0f, mult ) ), 
+//                   64     + ofRandom( pow(instability, mult)      / pow(2048.0f, mult ) ),
+//                   128    + ofRandom( pow(instability, mult)      / pow(2048.0f, mult ) ) );
 //        ofRectangle(0, 0, 640, 480);
     }
     else {
