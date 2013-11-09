@@ -28,6 +28,7 @@ xcuserdata/
 
 bin/*Debug*
 !bin/kinecTECH_ofxOpenNIDebug 0.0.1.4*
+!bin/kinecTECH_ofxOpenNIDebug_0.0.2.0*
 
 src_*
 src-*
