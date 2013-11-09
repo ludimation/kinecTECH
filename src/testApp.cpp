@@ -5,23 +5,6 @@ void testApp::setup() {
     
     ofSetLogLevel(OF_LOG_NOTICE);
     
-	/*
-     ofxOpenNI       openNIDevices[MAX_DEVICES];
-     int             numDevices;
-     ofTrueTypeFont  verdana;
-     
-     int screenID;
-     
-     ofTrueTypeFont		font;
-     ofTrueTypeFont      fontSMALL;
-     
-     string cals;
-     string labelCAL;
-     string bpm;
-     string labelBPM;
-     string messageSMALL;
-     */
-    
     // set initial background color
 	ofBackground(255, 128, 0);
     ofResetElapsedTimeCounter();
@@ -40,13 +23,23 @@ void testApp::setup() {
     cals = ofToString(0);
     bpm = ofToString(ofRandom(125, 185));
     bpm = bpm.substr(0, 5);
-    labelCAL = "CALORIES PER MINUTE";
+    labelCAL = "CALORIES BURNED";
     labelBPM = "HEARTBEATS PER MINUTE";
     
 	font.loadFont("franklinGothic.otf", 72);
     fontSMALL.loadFont("franklinGothic.otf", 18);
     verdana.loadFont(ofToDataPath("verdana.ttf"), 24);
-    
+
+    blendMode = OF_BLENDMODE_ALPHA;
+    /* 	
+     OF_BLENDMODE_DISABLED  = 0
+     OF_BLENDMODE_ALPHA     = 1
+     OF_BLENDMODE_ADD       = 2
+     OF_BLENDMODE_SUBTRACT  = 3
+     OF_BLENDMODE_MULTIPLY  = 4
+     OF_BLENDMODE_SCREEN    = 5
+     */
+
     cloudRes = -1;
     stopped = false;
     
@@ -68,10 +61,25 @@ void testApp::setup() {
         // addGesture(); // could be the gesture control I'm looking for
         // there are a slew of hand tracking functions too
         openNIDevices[deviceID].addDepthGenerator();
+        openNIDevices[deviceID].setUseDepthRawPixels(true);
         openNIDevices[deviceID].addImageGenerator();
-        openNIDevices[deviceID].addUserGenerator();
         openNIDevices[deviceID].setRegister(true);
         openNIDevices[deviceID].setMirror(true);
+        
+        // set up user generator
+        openNIDevices[deviceID].addUserGenerator();
+
+        // setup the hand generator
+        openNIDevices[deviceID].addHandsGenerator();
+        // or you can add them one at a time
+        //vector<string> gestureNames = openNIDevice.getAvailableGestures(); // you can use this to get a list of gestures
+        // prints to console and/or you can use the returned vector
+        //openNIDevice.addHandFocusGesture("Wave");
+                
+        // add all focus gestures (ie., wave, click, raise arm)
+        openNIDevices[deviceID].addAllHandFocusGestures();
+
+        
 		openNIDevices[deviceID].start();
     }
     
@@ -80,13 +88,16 @@ void testApp::setup() {
     
     // TODO: Is there a reason this was being limited to 1 before I commented it out?
     openNIDevices[0].setMaxNumUsers(4); // default is 4
+    openNIDevices[0].setMaxNumHands(8); // what is default?
+
     ofAddListener(openNIDevices[0].userEvent, this, &testApp::userEvent);
+    // TODO: do I also need a handEvent listener?
     
     ofxOpenNIUser user;
     user.setUseMaskTexture(true);
-    user.setUsePointCloud(true);
-    user.setPointCloudDrawSize(2); // this is the size of the glPoint that will be drawn for the point cloud
-    user.setPointCloudResolution(2); // this is the step size between points for the cloud -> eg., this sets it to every second point
+    // user.setUsePointCloud(true); // TODO/NOTE: I had to disable cleanout point cloud stuff because it gives bad access errors when switching between "debug" and "activity" screen
+    // user.setPointCloudDrawSize(2); // this is the size of the glPoint that will be drawn for the point cloud
+    // user.setPointCloudResolution(2); // this is the step size between points for the cloud -> eg., this sets it to every second point
     openNIDevices[0].setBaseUserClass(user); // this becomes the base class on which tracked users are created
                                              // allows you to set all tracked user properties to the same type easily
                                              // and allows you to create your own user class that inherits from ofxOpenNIUser
@@ -141,12 +152,12 @@ void testApp::draw(){
             
         case 0: 
             // 0 > debug
-            //
-            ofBackground(255, 128, 0);
+            // 
+            ofBackground(0, 255, 255);
             ofSetColor(255, 255, 255);
-            
+
             displayDebug = true;
-            displayHUD = true;
+            //displayHUD = true;
             displayReport = true;
 
             break;
@@ -163,12 +174,12 @@ void testApp::draw(){
             
         case 2: 
             // 2 > activity
-            // 
-            ofBackground(0, 255, 255);
+            //
+            ofBackground(255, 128, 0);
             ofSetColor(255, 255, 255);
 
             displayActivity = true;
-            displayHUD = true;
+            //displayHUD = true;
             displayReport = true;
 
             break;
@@ -187,7 +198,7 @@ void testApp::draw(){
             break;
     }
     
-    if (displayReport) {
+    if (displayReport) { // header for report stream -- ofDrawBitmap String occurs at end of draw so other modes can input their report data
         reportStream 
         << "ScreenID = " << screenID << " (press 'd' for debug[0], 'a' for activity[2]" <<endl
         << "Stopped = " << stopped <<" (press 'x' to stop all devices, 's' to start)" << endl
@@ -197,7 +208,7 @@ void testApp::draw(){
         << "Millis: " << ofGetElapsedTimeMillis() << endl
         << "FPS: " << ofGetFrameRate() << endl
         ;
-        ofDrawBitmapString(reportStream.str(), windowMargin, windowH - 150);
+        // ofDrawBitmapString(reportStream.str(), windowMargin, windowH - 150); // moved this to end of draw() so other elements could add to report stream
     }
     
     if (displayDebug) {
@@ -211,20 +222,41 @@ void testApp::draw(){
             //        openNIDevices[deviceID].drawImage(640, 0, 640, 480);
             //        openNIDevices[deviceID].drawSkeletons(640, 0, 640, 480);
             
+            // get number of current hands
+            int numHands = openNIDevices[deviceID].getNumTrackedHands();
+            
+            // iterate through hands
+            for (int i = 0; i < numHands; i++){
+                
+                // get a reference to this user
+                ofxOpenNIHand & hand = openNIDevices[deviceID].getTrackedHand(i);
+                
+                // get hand position
+                ofPoint & handPosition = hand.getPosition();
+                // do something with the positions like:
+                
+                // draw a rect at the position (don't confuse this with the debug draw which shows circles!!)
+                ofSetColor(255,0,0);
+                ofRect(handPosition.x, handPosition.y, 10, 10);
+            }
+            
+            reportStream
+            << "Device[" << deviceID <<"] FPS: " + ofToString(openNIDevices[deviceID].getFrameRate()) << endl;
         }
         
         // do some drawing of user clouds and masks
         ofPushMatrix();
-        ofEnableBlendMode(OF_BLENDMODE_ALPHA);
+        ofEnableBlendMode(blendMode);
         int numUsers = openNIDevices[0].getNumTrackedUsers();
         for (int nID = 0; nID < numUsers; nID++){
             ofxOpenNIUser & user = openNIDevices[0].getTrackedUser(nID);
-            user.drawMask();
+            // TODO: Would be nice to apply user masks in a way that plays better with multiple users
+            // user.drawMask();
             ofPushMatrix();
             ofRotate(180, 0, 1, 0);
             // ofTranslate(320, 240, -1000);
             ofTranslate(320, 240, 0);
-            user.drawPointCloud();
+            //user.drawPointCloud();
             ofPopMatrix();
         }
         ofDisableBlendMode();
@@ -238,6 +270,16 @@ void testApp::draw(){
         // displayActivity matrix = (-30, -30, 1340, 860);
         
         ofPushMatrix();
+        // ofEnableBlendMode(OF_BLENDMODE_ALPHA);
+        ofEnableBlendMode(blendMode);
+        /* 	
+         OF_BLENDMODE_DISABLED  = 0
+         OF_BLENDMODE_ALPHA     = 1
+         OF_BLENDMODE_ADD       = 2
+         OF_BLENDMODE_SUBTRACT  = 3
+         OF_BLENDMODE_MULTIPLY  = 4
+         OF_BLENDMODE_SCREEN    = 5
+         */
         
         for (int deviceID = 0; deviceID < numDevices; deviceID++){
             // ofTranslate(0, deviceID * 480);
@@ -255,9 +297,26 @@ void testApp::draw(){
             ofScale(pct, pct);
             ofTranslate(x, y);
             openNIDevices[deviceID].drawDepth(0, 0, 640, 480);
-            openNIDevices[deviceID].drawSkeletons(0, 0, 640, 480);
+            // openNIDevices[deviceID].drawSkeletons(0, 0, 640, 480);
 
-            /*
+            // Draw hands
+            int numHands = openNIDevices[deviceID].getNumTrackedHands(); // get number of current hands
+            for (int i = 0; i < numHands; i++){ // iterate through hands to drawn them
+                
+                // get a reference to this user
+                ofxOpenNIHand & hand = openNIDevices[deviceID].getTrackedHand(i);
+                
+                // get hand position
+                ofPoint & handPosition = hand.getPosition();
+
+                // draw a rect at the position (don't confuse this with the debug draw which shows circles!!)
+                ofSetColor(255,0,0);
+                ofRect(handPosition.x, handPosition.y, 10, 10);
+
+                // TODO: handle partisynths based on hand count and position
+            }
+            
+            /* // TODO: Would be nice to apply user masks in a more creative way
             // do some drawing of user clouds and masks
             ofPushMatrix();
             ofEnableBlendMode(OF_BLENDMODE_ALPHA);
@@ -275,8 +334,13 @@ void testApp::draw(){
             ofDisableBlendMode();
             ofPopMatrix();
             // */
+            
+            reportStream
+            << "Device[" << deviceID <<"] FPS: " + ofToString(openNIDevices[deviceID].getFrameRate()) << endl;
+
         }
         
+        ofDisableBlendMode();
         ofPopMatrix();
     }
         
@@ -307,7 +371,7 @@ void testApp::draw(){
         
         // draw HUD relative to right of screen
         ofPushMatrix();
-        ofTranslate(windowW-labelBGw, -labelBGh);
+        ofTranslate(windowW-labelBGw, (-labelBGh/2));
         
         int iMax;
         if (numUsers) {
@@ -354,6 +418,11 @@ void testApp::draw(){
 
         ofDisableAlphaBlending();
     }
+    
+    if (displayReport) { // this ofDrawBitmap String occurs at end of draw so other modes can input their report data after generic header
+        ofDrawBitmapString(reportStream.str(), windowMargin, windowH - 150);
+    }
+
 }
 
 //--------------------------------------------------------------
@@ -361,9 +430,16 @@ void testApp::userEvent(ofxOpenNIUserEvent & event){
     ofLogNotice() << getUserStatusAsString(event.userStatus) << "for user" << event.id << "from device" << event.deviceID;
 }
 
+
+//--------------------------------------------------------------
+void testApp::handEvent(ofxOpenNIHandEvent & event){
+    // show hand event messages in the console
+    ofLogNotice() << getHandStatusAsString(event.handStatus) << "for hand" << event.id << "from device" << event.deviceID;
+}
+
 //--------------------------------------------------------------
 void testApp::exit(){
-    // this often does not work -> it's a known bug -> but calling it on a key press or anywhere that isnt std::aexit() works
+    // this often does not work -> it's a known bug -> but calling it on a key press or anywhere that isnt std::exit() works
     // press 'x' to shutdown cleanly...
     for (int deviceID = 0; deviceID < numDevices; deviceID++){
         openNIDevices[deviceID].stop();
@@ -374,19 +450,36 @@ void testApp::exit(){
 void testApp::keyPressed(int key){
     cloudRes = -1;
     switch (key) {
+        case '0':
+            cloudRes = 1;
+            blendMode = OF_BLENDMODE_DISABLED;
+            /* 	
+             OF_BLENDMODE_DISABLED  = 0
+             OF_BLENDMODE_ALPHA     = 1
+             OF_BLENDMODE_ADD       = 2
+             OF_BLENDMODE_SUBTRACT  = 3
+             OF_BLENDMODE_MULTIPLY  = 4
+             OF_BLENDMODE_SCREEN    = 5
+             */
+            break;
         case '1':
             cloudRes = 1;
+            blendMode = OF_BLENDMODE_ALPHA;
             break;
         case '2':
+            blendMode = OF_BLENDMODE_ADD;
             cloudRes = 2;
             break;
         case '3':
+            blendMode = OF_BLENDMODE_SUBTRACT;
             cloudRes = 3;
             break;
         case '4':
+            blendMode = OF_BLENDMODE_MULTIPLY;
             cloudRes = 4;
             break;
         case '5':
+            blendMode = OF_BLENDMODE_SCREEN;
             cloudRes = 5;
             break;
         case 'x': // stop all devices
@@ -452,7 +545,7 @@ void testApp::keyPressed(int key){
             break;
     }
     for (int deviceID = 0; deviceID < numDevices; deviceID++){
-		openNIDevices[deviceID].setPointCloudResolutionAllUsers(cloudRes);
+		//openNIDevices[deviceID].setPointCloudResolutionAllUsers(cloudRes);
 	}
 }
 

@@ -27,6 +27,7 @@ xcuserdata/
 # Project.xcconfig
 
 bin/*Debug*
+!bin/kinecTECH_ofxOpenNIDebug 0.0.1.4*
 
 src_*
 src-*

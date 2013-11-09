@@ -24,10 +24,12 @@ public:
 	void windowResized(int w, int h);
 
     void userEvent(ofxOpenNIUserEvent & event);
+    void handEvent(ofxOpenNIHandEvent & event);
 
-	ofxOpenNI       openNIDevices[MAX_DEVICES];
-    int             numDevices;
-    ofTrueTypeFont  verdana;
+    ofTrueTypeFont      verdana;
+	ofxOpenNI           openNIDevices[MAX_DEVICES];
+    int                 numDevices;
+    enum ofBlendMode     blendMode;
     
     
 private:
@@ -50,7 +52,7 @@ private:
     string labelCAL;
     string bpm;
     string labelBPM;
-    string messageSMALL;
+    // string messageSMALL; // TODO: cleanup? Not sure this is used anywhere
     
 };
 
