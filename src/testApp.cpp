@@ -189,14 +189,14 @@ void testApp::updateProperties(){
         for (int i = 0; i < handPositions.size(); i++) {
             // x positions range from 0 (left) - 640 (right)
             float pctY =    1   - handPositions[i].y / 480.0f; // y positions range from 0 (top) - 480 (bottom)
-            float pctZ =    1   - (handPositions[i].z - 500.0f) / 2500.0f; // z positions range from about 500 (near) - 3000 (far)
+            float pctZ =    1; // 1   - handPositions[i].z / 2500.0f; // z positions range from about 500 (near) - 3000 (far), but this should be done relative to player's torso since it requires a great deal of movement from the player to get this tuned appealingly
             instabilityPct += pctY * pctZ / handPositions.size();
             cout << "handPositions["<<i<<"] = ("<<handPositions[i].x<<", "<<handPositions[i].y<<", "<<handPositions[i].z<<")"<<endl;
         }
     }
 
     // exponential relationship between instabilityPct and instability
- 	instability = 1000.0f * pow(1.059463094359f, instabilityPct*75.0f);
+ 	instability = 100.0f * pow(1.059463094359f, instabilityPct*75.0f);
 }
 
 
