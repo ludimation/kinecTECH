@@ -12,7 +12,7 @@ public:
     ~PartisynthMngr();
     
     void setup();
-    void update();
+    void update(vector<ofPoint> handPositions);
     void draw();
 
     void keyPressed  (int key);

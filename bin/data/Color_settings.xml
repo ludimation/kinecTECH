@@ -1,0 +1,46 @@
+<controls>
+    <ColorPicker_Start_Color>
+        <name>Start Color</name>
+        <values_0>0.319999993</values_0>
+        <values_1>0.389999986</values_1>
+        <values_2>0.579999983</values_2>
+        <values_3>0.759999990</values_3>
+    </ColorPicker_Start_Color>
+    <ColorPicker_Start_Color_Var>
+        <name>Start Color Var</name>
+        <values_0>0.419999987</values_0>
+        <values_1>0.750000000</values_1>
+        <values_2>0.879999995</values_2>
+        <values_3>0.079999998</values_3>
+    </ColorPicker_Start_Color_Var>
+    <ColorPicker_End_Color>
+        <name>End Color</name>
+        <values_0>0.790000021</values_0>
+        <values_1>0.850000024</values_1>
+        <values_2>0.419999987</values_2>
+        <values_3>0.000000000</values_3>
+    </ColorPicker_End_Color>
+    <ColorPicker_End_Color_Var>
+        <name>End Color Var</name>
+        <values_0>0.449999988</values_0>
+        <values_1>0.509999990</values_1>
+        <values_2>0.000000000</values_2>
+        <values_3>0.000000000</values_3>
+    </ColorPicker_End_Color_Var>
+    <ComboBox_Blend_Type_Src>
+        <name>Blend Type Src</name>
+        <value>4</value>
+    </ComboBox_Blend_Type_Src>
+    <ComboBox_Blend_Type_Dest>
+        <name>Blend Type Dest</name>
+        <value>6</value>
+    </ComboBox_Blend_Type_Dest>
+    <Button_Normal>
+        <name>Normal</name>
+        <value>0</value>
+    </Button_Normal>
+    <Button_Addictive>
+        <name>Addictive</name>
+        <value>0</value>
+    </Button_Addictive>
+</controls>

@@ -343,7 +343,7 @@ void Partisynth::draw(){
         case 'd': // debug screen
         default: // modified from original audioOutputExample application
             //screenLabel += ": debug screen";
-            drawWaveforms = true;
+            //drawWaveforms = true;
             //drawEmitter = true;
             //drawInstructions = true;
             drawReport = true;
@@ -386,14 +386,9 @@ void Partisynth::draw(){
     }
     
     if (drawEmitter) {
-        
-        
-        
         for (int i=0; i < emitters.size(); i++) {
             emitters[i].draw( 0, 0 );
         }
-        
-
     }
     
     if (drawWaveforms) {

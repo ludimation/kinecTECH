@@ -1,0 +1,74 @@
+<controls>
+    <Button_Circle_1>
+        <name>Circle 1</name>
+        <value>0</value>
+    </Button_Circle_1>
+    <Button_Circle_2>
+        <name>Circle 2</name>
+        <value>0</value>
+    </Button_Circle_2>
+    <Button_Circle_3>
+        <name>Circle 3</name>
+        <value>0</value>
+    </Button_Circle_3>
+    <Button_Particle_1>
+        <name>Particle 1</name>
+        <value>0</value>
+    </Button_Particle_1>
+    <Button_Particle_2>
+        <name>Particle 2</name>
+        <value>0</value>
+    </Button_Particle_2>
+    <Button_Particle_3>
+        <name>Particle 3</name>
+        <value>0</value>
+    </Button_Particle_3>
+    <Button_Particle_4>
+        <name>Particle 4</name>
+        <value>0</value>
+    </Button_Particle_4>
+    <Button_Particle_5>
+        <name>Particle 5</name>
+        <value>0</value>
+    </Button_Particle_5>
+    <Button_Particle_6>
+        <name>Particle 6</name>
+        <value>0</value>
+    </Button_Particle_6>
+    <Button_Save_Particle_XML>
+        <name>Save Particle XML</name>
+        <value>0</value>
+    </Button_Save_Particle_XML>
+    <Button_Circles>
+        <name>Circles</name>
+        <value>0</value>
+    </Button_Circles>
+    <Button_Drugs>
+        <name>Drugs</name>
+        <value>0</value>
+    </Button_Drugs>
+    <Button_Fire>
+        <name>Fire</name>
+        <value>0</value>
+    </Button_Fire>
+    <Button_Sun>
+        <name>Sun</name>
+        <value>0</value>
+    </Button_Sun>
+    <Button_Waterfall>
+        <name>Waterfall</name>
+        <value>0</value>
+    </Button_Waterfall>
+    <Button_JellyFish>
+        <name>JellyFish</name>
+        <value>0</value>
+    </Button_JellyFish>
+    <Button_Circles_Wave>
+        <name>Circles Wave</name>
+        <value>0</value>
+    </Button_Circles_Wave>
+    <Button_Particle_Settings>
+        <name>Particle Settings</name>
+        <value>0</value>
+    </Button_Particle_Settings>
+</controls>

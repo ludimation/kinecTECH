@@ -33,6 +33,7 @@ public:
 	ofxOpenNI           openNIDevices[MAX_DEVICES];
     int                 numDevices;
     enum ofBlendMode    blendMode;
+    vector<ofPoint>     handPositions;
     
 private:
     ////////////

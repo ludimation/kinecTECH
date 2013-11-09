@@ -16,6 +16,11 @@ void testApp::setup() {
     ////////////
     // setup partisynth manager
     ////////////
+    handPositions.clear();
+    ofPoint handPosition;
+    handPosition.x = 320;
+    handPosition.y = 240;
+    handPositions.push_back(handPosition);
     partisynthmngr.setup();
     
 
@@ -147,7 +152,28 @@ void testApp::update(){
         openNIDevices[deviceID].update();
     }
     
-    partisynthmngr.update(); // TODO: hand down a list of hand points
+
+    // iterate through hands and store positions
+    handPositions.clear();
+    if (numDevices) {
+        for (int deviceID = 0; deviceID < numDevices; deviceID++){
+            int numHands = openNIDevices[deviceID].getNumTrackedHands(); // get number of current hands
+            // TODO: store a list of hand locations to both print in debug and hand to partisynthMngr during .update()
+            for (int i = 0; i < numHands; i++){
+                
+                ofxOpenNIHand & hand = openNIDevices[deviceID].getTrackedHand(i); // get a reference to this hand
+                ofPoint & handPosition = hand.getPosition(); // get hand position
+                handPositions.push_back(handPosition); // store the positions
+            }
+        }
+    }
+    else {
+        ofPoint handPosition;
+        handPosition.x = 320;
+        handPosition.y = 240;
+        handPositions.push_back(handPosition);
+    }
+    partisynthmngr.update(handPositions);
 }
 
 //--------------------------------------------------------------
@@ -158,9 +184,11 @@ void testApp::draw(){
 
     // define booleans for drawing elements
     bool    displayActivity = false;
-    bool    displayHUD = false;
-    bool    displayDebug = false;
-    bool    displayReport = false;
+    bool    displayHUD      = false;
+    bool    displayDebug    = false;
+    bool    displayReport   = false;
+    bool    screenShake     = false;
+    bool    screenFlicker   = false;
     
     // get width and height of window for positioning of calories burned labels
     int windowW = ofGetWidth();
@@ -204,8 +232,10 @@ void testApp::draw(){
             ofSetColor(255, 255, 255);
 
             displayActivity = true;
-            //displayHUD = true;
-            displayReport = true;
+            screenShake     = true;
+            screenFlicker   = true;
+            //displayHUD      = true;
+            displayReport   = true;
 
             break;
             
@@ -240,6 +270,7 @@ void testApp::draw(){
         
         ofPushMatrix();
         
+        ofEnableBlendMode(blendMode);
         for (int deviceID = 0; deviceID < numDevices; deviceID++){
             ofTranslate(0, deviceID * 480);
             openNIDevices[deviceID].drawDebug(); // debug draw does the equicalent of the commented methods below
@@ -247,36 +278,24 @@ void testApp::draw(){
             //        openNIDevices[deviceID].drawImage(640, 0, 640, 480);
             //        openNIDevices[deviceID].drawSkeletons(640, 0, 640, 480);
             
-            // get number of current hands
-            int numHands = openNIDevices[deviceID].getNumTrackedHands();
-            
-            // iterate through hands
-            // TODO, move this to .update() Function, store a list of hand locations to both print here in debug and hand to partisynthMngr during .update()
-            for (int i = 0; i < numHands; i++){
-                
-                // get a reference to this user
-                ofxOpenNIHand & hand = openNIDevices[deviceID].getTrackedHand(i);
-                
-                // get hand position
-                ofPoint & handPosition = hand.getPosition();
-                // do something with the positions like:
-                
-                // TODO: Keep this part here, updating the above loop to iterate through hand positions list
-                // draw a rect at the position (don't confuse this with the debug draw which shows circles!!)
-                ofSetColor(255,0,0);
-                ofRect(handPosition.x, handPosition.y, 10, 10);
-            }
-            
             reportStream
             << "Device[" << deviceID <<"] FPS: " + ofToString(openNIDevices[deviceID].getFrameRate()) << endl;
         }
         
+        // iterate through handsPositions and draw small rects at their locations
+        int numHands = handPositions.size();
+        // print hand locations
+        for (int i = 0; i < numHands; i++){
+            // draw a rect at the position (don't confuse this with the debug draw which shows circles!!)
+            ofSetColor(255,0,0);
+            ofRect(handPositions[i].x, handPositions[i].y, 10, 10);
+        }
+
         // draw particle emitters
         partisynthmngr.draw();
         
         // do some drawing of user clouds and masks
         ofPushMatrix();
-        ofEnableBlendMode(blendMode);
         int numUsers = openNIDevices[0].getNumTrackedUsers();
         for (int nID = 0; nID < numUsers; nID++){
             ofxOpenNIUser & user = openNIDevices[0].getTrackedUser(nID);
@@ -295,6 +314,44 @@ void testApp::draw(){
         ofPopMatrix();
     }
     
+    /*
+    if (screenShake) {
+        int mult = 5;
+        ofTranslate(ofRandomf() * pow(targetFrequency,mult)    / pow(2000.0f, mult  ), 
+                    ofRandomf() * pow(targetFrequency,mult)    / pow(2000.0f, mult  ), 
+                    ofRandomf() * pow(targetFrequency,mult/2)  / pow(2000.0f, mult/2) );        
+    }
+    //*/
+    
+    ofPushStyle();
+    //ofEnableBlendMode(OF_BLENDMODE_ADD);
+    /* 	
+     OF_BLENDMODE_DISABLED  = 0
+     OF_BLENDMODE_ALPHA     = 1
+     OF_BLENDMODE_ADD       = 2
+     OF_BLENDMODE_SUBTRACT  = 3
+     OF_BLENDMODE_MULTIPLY  = 4
+     OF_BLENDMODE_SCREEN    = 5
+     */
+    /*
+    if (screenFlicker) {
+        float mult = 5;
+        ofBackground(16     + ofRandom( pow(targetFrequency, mult)      / pow(2048.0f, mult ) ), 
+                     64     + ofRandom( pow(targetFrequency, mult)      / pow(2048.0f, mult ) ),
+                     128    + ofRandom( pow(targetFrequency, mult)      / pow(2048.0f, mult ) ) );
+//        ofSetColor(     16     + ofRandom( pow(targetFrequency, mult)      / pow(2048.0f, mult ) ), 
+//                   64     + ofRandom( pow(targetFrequency, mult)      / pow(2048.0f, mult ) ),
+//                   128    + ofRandom( pow(targetFrequency, mult)      / pow(2048.0f, mult ) ) );
+//        ofRectangle(0, 0, 640, 480);
+    }
+    else {
+        // ofBackground(16, 64, 128);
+        ofSetColor(16, 64, 128);
+        ofRectangle(0, 0, 640, 480);
+    } //*/
+    // ofDisableBlendMode();
+    ofPopStyle();
+        
     if (displayActivity) {
         
         // displayActivity matrix = (-30, -30, 1340, 860);
@@ -329,26 +386,6 @@ void testApp::draw(){
             openNIDevices[deviceID].drawDepth(0, 0, 640, 480);
             // openNIDevices[deviceID].drawSkeletons(0, 0, 640, 480);
 
-            // Draw hands // see notes in debug above
-            int numHands = openNIDevices[deviceID].getNumTrackedHands(); // get number of current hands
-            for (int i = 0; i < numHands; i++){ // iterate through hands to drawn them
-                
-                // get a reference to this user
-                ofxOpenNIHand & hand = openNIDevices[deviceID].getTrackedHand(i);
-                
-                // get hand position
-                ofPoint & handPosition = hand.getPosition();
-
-                // draw a rect at the position (don't confuse this with the debug draw which shows circles!!)
-                ofSetColor(255,0,0);
-                ofRect(handPosition.x, handPosition.y, 10, 10);
-
-                // TODO: handle partisynths based on hand count and position
-            }
-            
-            // draw particle emitters
-            partisynthmngr.draw();
-
             /* // TODO: Would be nice to apply user masks in a more creative way
             // do some drawing of user clouds and masks
             ofPushMatrix();
@@ -372,7 +409,18 @@ void testApp::draw(){
             << "Device[" << deviceID <<"] FPS: " + ofToString(openNIDevices[deviceID].getFrameRate()) << endl;
 
         }
+        // iterate through handsPositions and draw small rects at their locations
+        int numHands = handPositions.size();
+        // print hand locations
+        for (int i = 0; i < numHands; i++){
+            // draw a rect at the position (don't confuse this with the debug draw which shows circles!!)
+            ofSetColor(255,0,0);
+            ofRect(handPositions[i].x, handPositions[i].y, 10, 10);
+        } 
         
+        // draw particle emitters
+        partisynthmngr.draw();
+       
         ofDisableBlendMode();
         ofPopMatrix();
     }
