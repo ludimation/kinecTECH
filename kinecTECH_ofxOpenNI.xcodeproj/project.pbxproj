@@ -7,6 +7,14 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		5C1C9A3D182DD64A0084534B /* ofxParticleEmitter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5C1C9A33182DD64A0084534B /* ofxParticleEmitter.cpp */; };
+		5C1C9A51182DD67D0084534B /* ofxMSAInteractiveObject.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5C1C9A4D182DD67D0084534B /* ofxMSAInteractiveObject.cpp */; };
+		5C1C9A5B182DD6AB0084534B /* tinyxml.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5C1C9A54182DD6AB0084534B /* tinyxml.cpp */; };
+		5C1C9A5C182DD6AB0084534B /* tinyxmlerror.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5C1C9A56182DD6AB0084534B /* tinyxmlerror.cpp */; };
+		5C1C9A5D182DD6AB0084534B /* tinyxmlparser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5C1C9A57182DD6AB0084534B /* tinyxmlparser.cpp */; };
+		5C1C9A5E182DD6AB0084534B /* ofxXmlSettings.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5C1C9A59182DD6AB0084534B /* ofxXmlSettings.cpp */; };
+		5C1C9A63182DD9400084534B /* partisynth.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5C1C9A5F182DD9400084534B /* partisynth.cpp */; };
+		5C1C9A64182DD9400084534B /* partisynthmngr.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5C1C9A61182DD9400084534B /* partisynthmngr.cpp */; };
 		7704EC2414C70657001AF021 /* testApp.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7704EC2114C70657001AF021 /* testApp.cpp */; };
 		7704EC2614C7066A001AF021 /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7704EC2514C7066A001AF021 /* main.cpp */; };
 		770F032514B9969E003CCE99 /* libnimCodecs.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 770F031714B9969E003CCE99 /* libnimCodecs.dylib */; };
@@ -73,6 +81,20 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		5C1C9A33182DD64A0084534B /* ofxParticleEmitter.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ofxParticleEmitter.cpp; sourceTree = "<group>"; };
+		5C1C9A34182DD64A0084534B /* ofxParticleEmitter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ofxParticleEmitter.h; sourceTree = "<group>"; };
+		5C1C9A4D182DD67D0084534B /* ofxMSAInteractiveObject.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ofxMSAInteractiveObject.cpp; sourceTree = "<group>"; };
+		5C1C9A4E182DD67D0084534B /* ofxMSAInteractiveObject.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ofxMSAInteractiveObject.h; sourceTree = "<group>"; };
+		5C1C9A54182DD6AB0084534B /* tinyxml.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = tinyxml.cpp; sourceTree = "<group>"; };
+		5C1C9A55182DD6AB0084534B /* tinyxml.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = tinyxml.h; sourceTree = "<group>"; };
+		5C1C9A56182DD6AB0084534B /* tinyxmlerror.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = tinyxmlerror.cpp; sourceTree = "<group>"; };
+		5C1C9A57182DD6AB0084534B /* tinyxmlparser.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = tinyxmlparser.cpp; sourceTree = "<group>"; };
+		5C1C9A59182DD6AB0084534B /* ofxXmlSettings.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ofxXmlSettings.cpp; sourceTree = "<group>"; };
+		5C1C9A5A182DD6AB0084534B /* ofxXmlSettings.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ofxXmlSettings.h; sourceTree = "<group>"; };
+		5C1C9A5F182DD9400084534B /* partisynth.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = partisynth.cpp; sourceTree = "<group>"; };
+		5C1C9A60182DD9400084534B /* partisynth.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = partisynth.h; sourceTree = "<group>"; };
+		5C1C9A61182DD9400084534B /* partisynthmngr.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = partisynthmngr.cpp; sourceTree = "<group>"; };
+		5C1C9A62182DD9400084534B /* partisynthmngr.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = partisynthmngr.h; sourceTree = "<group>"; };
 		7704EC2114C70657001AF021 /* testApp.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = testApp.cpp; sourceTree = "<group>"; };
 		7704EC2214C70657001AF021 /* testApp.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = testApp.h; sourceTree = "<group>"; };
 		7704EC2514C7066A001AF021 /* main.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
@@ -283,9 +305,78 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		5C1C9A24182DD6490084534B /* ofxParticleEmitter */ = {
+			isa = PBXGroup;
+			children = (
+				5C1C9A31182DD64A0084534B /* src */,
+			);
+			name = ofxParticleEmitter;
+			path = ../../../addons/ofxParticleEmitter;
+			sourceTree = "<group>";
+		};
+		5C1C9A31182DD64A0084534B /* src */ = {
+			isa = PBXGroup;
+			children = (
+				5C1C9A33182DD64A0084534B /* ofxParticleEmitter.cpp */,
+				5C1C9A34182DD64A0084534B /* ofxParticleEmitter.h */,
+			);
+			path = src;
+			sourceTree = "<group>";
+		};
+		5C1C9A42182DD67D0084534B /* ofxMSAInteractiveObject */ = {
+			isa = PBXGroup;
+			children = (
+				5C1C9A4C182DD67D0084534B /* src */,
+			);
+			name = ofxMSAInteractiveObject;
+			path = ../../../addons/ofxMSAInteractiveObject;
+			sourceTree = "<group>";
+		};
+		5C1C9A4C182DD67D0084534B /* src */ = {
+			isa = PBXGroup;
+			children = (
+				5C1C9A4D182DD67D0084534B /* ofxMSAInteractiveObject.cpp */,
+				5C1C9A4E182DD67D0084534B /* ofxMSAInteractiveObject.h */,
+			);
+			path = src;
+			sourceTree = "<group>";
+		};
+		5C1C9A52182DD6AB0084534B /* ofxXmlSettings */ = {
+			isa = PBXGroup;
+			children = (
+				5C1C9A53182DD6AB0084534B /* libs */,
+				5C1C9A58182DD6AB0084534B /* src */,
+			);
+			name = ofxXmlSettings;
+			path = ../../../addons/ofxXmlSettings;
+			sourceTree = "<group>";
+		};
+		5C1C9A53182DD6AB0084534B /* libs */ = {
+			isa = PBXGroup;
+			children = (
+				5C1C9A54182DD6AB0084534B /* tinyxml.cpp */,
+				5C1C9A55182DD6AB0084534B /* tinyxml.h */,
+				5C1C9A56182DD6AB0084534B /* tinyxmlerror.cpp */,
+				5C1C9A57182DD6AB0084534B /* tinyxmlparser.cpp */,
+			);
+			path = libs;
+			sourceTree = "<group>";
+		};
+		5C1C9A58182DD6AB0084534B /* src */ = {
+			isa = PBXGroup;
+			children = (
+				5C1C9A59182DD6AB0084534B /* ofxXmlSettings.cpp */,
+				5C1C9A5A182DD6AB0084534B /* ofxXmlSettings.h */,
+			);
+			path = src;
+			sourceTree = "<group>";
+		};
 		5C6AE16B1825EC02008F1291 /* ofxOpenNI */ = {
 			isa = PBXGroup;
 			children = (
+				77781EA614BA9AE300CD45EF /* src */,
+				770F031514B9969E003CCE99 /* lib */,
+				770F033314B996AE003CCE99 /* include */,
 			);
 			name = ofxOpenNI;
 			sourceTree = "<group>";
@@ -537,10 +628,10 @@
 		BB4B014C10F69532006C3DED /* addons */ = {
 			isa = PBXGroup;
 			children = (
+				5C1C9A52182DD6AB0084534B /* ofxXmlSettings */,
+				5C1C9A42182DD67D0084534B /* ofxMSAInteractiveObject */,
+				5C1C9A24182DD6490084534B /* ofxParticleEmitter */,
 				5C6AE16B1825EC02008F1291 /* ofxOpenNI */,
-				77781EA614BA9AE300CD45EF /* src */,
-				770F031514B9969E003CCE99 /* lib */,
-				770F033314B996AE003CCE99 /* include */,
 			);
 			name = addons;
 			sourceTree = "<group>";
@@ -603,6 +694,10 @@
 		E4B69E1C0A3A1BDC003C02F2 /* src */ = {
 			isa = PBXGroup;
 			children = (
+				5C1C9A5F182DD9400084534B /* partisynth.cpp */,
+				5C1C9A60182DD9400084534B /* partisynth.h */,
+				5C1C9A61182DD9400084534B /* partisynthmngr.cpp */,
+				5C1C9A62182DD9400084534B /* partisynthmngr.h */,
 				7704EC2514C7066A001AF021 /* main.cpp */,
 				7704EC2114C70657001AF021 /* testApp.cpp */,
 				7704EC2214C70657001AF021 /* testApp.h */,
@@ -709,6 +804,14 @@
 				77EBF17C14BEF08600D2C8EC /* ofxOpenNITypes.cpp in Sources */,
 				7704EC2414C70657001AF021 /* testApp.cpp in Sources */,
 				7704EC2614C7066A001AF021 /* main.cpp in Sources */,
+				5C1C9A3D182DD64A0084534B /* ofxParticleEmitter.cpp in Sources */,
+				5C1C9A51182DD67D0084534B /* ofxMSAInteractiveObject.cpp in Sources */,
+				5C1C9A5B182DD6AB0084534B /* tinyxml.cpp in Sources */,
+				5C1C9A5C182DD6AB0084534B /* tinyxmlerror.cpp in Sources */,
+				5C1C9A5D182DD6AB0084534B /* tinyxmlparser.cpp in Sources */,
+				5C1C9A5E182DD6AB0084534B /* ofxXmlSettings.cpp in Sources */,
+				5C1C9A63182DD9400084534B /* partisynth.cpp in Sources */,
+				5C1C9A64182DD9400084534B /* partisynthmngr.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

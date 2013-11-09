@@ -3,6 +3,7 @@
 
 #include "ofxOpenNI.h"
 #include "ofMain.h"
+#include "partisynthmngr.h"
 
 #define MAX_DEVICES 2
 
@@ -29,8 +30,7 @@ public:
     ofTrueTypeFont      verdana;
 	ofxOpenNI           openNIDevices[MAX_DEVICES];
     int                 numDevices;
-    enum ofBlendMode     blendMode;
-    
+    enum ofBlendMode    blendMode;
     
 private:
     ////////////
@@ -53,6 +53,8 @@ private:
     string bpm;
     string labelBPM;
     // string messageSMALL; // TODO: cleanup? Not sure this is used anywhere
+    
+    ofSoundStream       soundStream;
     
 };
 

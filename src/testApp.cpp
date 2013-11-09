@@ -9,6 +9,11 @@ void testApp::setup() {
 	ofBackground(255, 128, 0);
     ofResetElapsedTimeCounter();
     
+    // set up audio
+    int bufferSize              = 512;
+	int sampleRate              = 44100;
+ 	soundStream.setup(this, 2, 0, sampleRate, bufferSize, 4);
+   
     ////////////
     // set screen to display
     ////////////
