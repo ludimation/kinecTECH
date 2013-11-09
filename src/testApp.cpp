@@ -4,12 +4,12 @@
 void testApp::setup() {
     
     ////////////
-    // setup screenID and hud elements 
+    // set global of environment settings
     ////////////
     ofSetLogLevel(OF_LOG_NOTICE);
     ofSetVerticalSync(TRUE);
 	ofSetFrameRate(60);
-	ofBackground(255, 128, 0);    // set initial background color
+	ofBackground(255, 128, 0);    // initial background color
     ofResetElapsedTimeCounter();
     
     
@@ -17,13 +17,13 @@ void testApp::setup() {
     // setup partisynth manager
     ////////////
     handPositions.clear();
-    ofPoint handPosition;
-    handPosition.x = 320;
-    handPosition.y = 240;
-    handPositions.push_back(handPosition);
+    //ofPoint handPosition;
+    //handPosition.x = 320;
+    //handPosition.y = 240;
+    //handPositions.push_back(handPosition);
     partisynthmngr.setup();
     
-
+    
     ////////////
     // setup soundstream
     ////////////
@@ -35,7 +35,7 @@ void testApp::setup() {
     int bufferSize              = 512;
 	int sampleRate              = 44100;
  	soundStream.setup(this, 2, 0, sampleRate, bufferSize, 4);
-   
+    
     
     ////////////
     // setup screenID, blendMode, and other display variables
@@ -48,7 +48,8 @@ void testApp::setup() {
     instability = 440.0f; // used in screenShake and screenFlicker--is based off legacy frequency calculations and should eventually normalized to more understandable numbers 
     heightPct = 0.5f;
     blendMode = OF_BLENDMODE_ALPHA;
-
+    
+    
     ////////////
     // setup HUD elements like fonts, and labels
     ////////////    
@@ -71,6 +72,7 @@ void testApp::setup() {
     labelCAL = "CALORIES BURNED";
     labelBPM = "HEARTBEATS PER MINUTE";
 
+    
     ////////////
     // set up kinects
     ////////////
@@ -145,6 +147,7 @@ void testApp::setup() {
 //        user.setPointCloudDrawSize(2);
 //        user.setPointCloudResolution(1);
 //    }
+    
 }
 
 //--------------------------------------------------------------
@@ -177,8 +180,10 @@ void testApp::update(){
             }
         }
     }
+ 
     partisynthmngr.update(handPositions);
     updateProperties();
+
 }
 
 void testApp::updateProperties(){
@@ -422,16 +427,18 @@ void testApp::draw(){
             //        openNIDevices[deviceID].drawImage(640, 0, 640, 480);
             //        openNIDevices[deviceID].drawSkeletons(640, 0, 640, 480);
             
-            int pctW = windowW / 640 + 0.15f;
-            int pctH = windowH / 480 + 0.15f;
-            int pct = MAX(pctW, pctH);
-            int offsetX = 0;
-            int offsetY = 30;
-            int x = (windowW / 2) - (640 * pct / 2);
-            int y = (windowH / 2) - (480 * pct / 2);
+            float pctW  = windowW  * 1.15f     / 640.0f;
+            float pctH  = windowH  * 1.15f     / 480.0f;
+            float pct   = MAX(pctW, pctH);
+            float offsetX   =   0.0f;
+            float offsetY   =  45.0f;
             
-            ofScale(pct, pct);
-            ofTranslate(x + offsetX, y + offsetY);
+            float x = (windowW / 2.0f) - (640.0f * pct / 2.0f);
+            float y = (windowH / 2.0f) - (480.0f * pct / 2.0f);
+
+            ofScale(pct, pct, 0.0f);
+            ofTranslate(x + offsetX, y + offsetY, 0.0f);
+
             openNIDevices[deviceID].drawDepth(0, 0, 640, 480);
             // openNIDevices[deviceID].drawSkeletons(0, 0, 640, 480);
 
