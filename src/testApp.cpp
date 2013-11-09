@@ -47,7 +47,7 @@ void testApp::setup() {
     screenID = 2; // 0; // 0 = debug, 1 = settings/instructions, 2 = activity, 3 = credits
     instability = 440.0f; // used in screenShake and screenFlicker--is based off legacy frequency calculations and should eventually normalized to more understandable numbers 
     heightPct = 0.5f;
-    blendMode = OF_BLENDMODE_ALPHA;    
+    blendMode = OF_BLENDMODE_ADD;    
     /* 	
      enum ofBlendMode {
          OF_BLENDMODE_DISABLED  = 0,
@@ -58,7 +58,7 @@ void testApp::setup() {
          OF_BLENDMODE_SCREEN    = 5
      };
      */
-    depthColoring = COLORING_PSYCHEDELIC;
+    depthColoring = COLORING_BLUES_INV; //TODO: test the inversion of the light and darks in this mode to see if it worked
     /* 
      enum DepthColoring {
          COLORING_PSYCHEDELIC_SHADES    = 0,
@@ -66,9 +66,10 @@ void testApp::setup() {
          COLORING_RAINBOW               = 2,
          COLORING_CYCLIC_RAINBOW        = 3, // default value in ofxOpenNI
          COLORING_BLUES                 = 4,
-         COLORING_GREY                  = 5,
-         COLORING_STATUS                = 6,       
-         COLORING_COUNT                 = 7
+         COLORING_BLUES_INV             = 5,
+         COLORING_GREY                  = 6,
+         COLORING_STATUS                = 7,       
+         COLORING_COUNT                 = 8
      };
      */
 
@@ -666,9 +667,10 @@ void testApp::keyPressed(int key){
              COLORING_RAINBOW               = 2,
              COLORING_CYCLIC_RAINBOW        = 3, // default value in ofxOpenNI
              COLORING_BLUES                 = 4,
-             COLORING_GREY                  = 5,
-             COLORING_STATUS                = 6,       
-             COLORING_COUNT                 = 7
+             COLORING_BLUES_INV             = 5,
+             COLORING_GREY                  = 6,
+             COLORING_STATUS                = 7,       
+             COLORING_COUNT                 = 8
          };
          */
         case ')': // SHIFT + 0
@@ -687,13 +689,13 @@ void testApp::keyPressed(int key){
             depthColoring = COLORING_BLUES;
             break;
         case '%': // SHIFT + 5
-            depthColoring = COLORING_GREY;
+            depthColoring = COLORING_BLUES_INV;
             break;
         case '^': // SHIFT + 6
-            depthColoring = COLORING_STATUS;
+            depthColoring = COLORING_GREY;
             break;
         case '&': // SHIFT + 7
-            depthColoring = COLORING_COUNT;
+            depthColoring = COLORING_STATUS;
             break;
             
             
